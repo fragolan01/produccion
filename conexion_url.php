@@ -1,0 +1,1 @@
+<?php $vurl='development.fragolan.com'; ?>
