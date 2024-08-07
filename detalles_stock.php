@@ -56,6 +56,12 @@
 
 <?php
 
+// Muestra todos los errores de PHP
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 // echo '<form action="menu.php" method="post">';
 // echo '<input type="submit" name="menu" value="inicio ">';
 // echo "\t";
@@ -148,6 +154,7 @@ if ($tc_especial < $float_tc ) {
 } elseif ($tc_especial != $float_tc) {
     echo '<table><tr><td style="background-color: #00FF00; color: #000000; font-weight: bold; text-align: center;">El TC UTILIZADO ES : ' . $tc_especial . '</td></tr></table>';
 }
+
 echo "<br><br>";
 $sql = "
     SELECT
@@ -266,7 +273,7 @@ if($result_all-> num_rows > 0){
 
             // Estado Meli
             echo "<td><center>";
-            echo "<center>" . $row['status_meli'] . "</center>";
+            // echo "<center>" . $row['status_meli'] . "</center>";
             echo "</td></center>";
 
             // Botones Mercado libre    
@@ -274,8 +281,6 @@ if($result_all-> num_rows > 0){
 
             echo "<b><a href='pausaMl.php?id_syscom=" . $row['id_syscom'] . "'>&laquo; PAUSAR</a></b>";
             echo "<b><a href='activaMl.php?id_syscom=" . $row['id_syscom'] . "'>&laquo; ACTIVAR</a></b>";
-
-
             echo "</td></center>";
             
 
