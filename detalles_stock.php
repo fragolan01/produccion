@@ -7,8 +7,6 @@
 
     <style>
         /* Estilo para los botones */
-
-        
         form {
             display: inline-block;
             margin-bottom: 10px;
@@ -118,8 +116,6 @@ if( $result->num_rows > 0 ){
         echo '<tr>';
         echo '<td>' . $row["fecha"] . '</td>';
         echo '<td>' . $row["normal"] . '</td>';
-
-
         echo '</th><td>';
             echo '<center>';
             echo "<form name='detalles_stock' method='post' action='detalles_stock'>";
@@ -128,8 +124,6 @@ if( $result->num_rows > 0 ){
             echo "</form>";
             echo '</center>';
         echo '</td>';
-
-
         $float_tc = floatval($row["normal"]);
         echo '<td>' . "16%" . '</td>';
         echo '</tr>';
@@ -154,9 +148,6 @@ if ($tc_especial < $float_tc ) {
 } elseif ($tc_especial != $float_tc) {
     echo '<table><tr><td style="background-color: #00FF00; color: #000000; font-weight: bold; text-align: center;">El TC UTILIZADO ES : ' . $tc_especial . '</td></tr></table>';
 }
-
-
-
 echo "<br><br>";
 $sql = "
     SELECT
@@ -271,8 +262,24 @@ if($result_all-> num_rows > 0){
                     }else{
                         echo "<b><center><font >  S/C </font></b></center>";
                     }
-        
             echo "</td></center>";
+
+            // Estado Meli
+            echo "<td><center>";
+            echo "<center>" . $row['status_meli'] . "</center>";
+            echo "</td></center>";
+
+            // Botones Mercado libre    
+            echo "<td><center>";
+
+            echo "<b><a href='pausaMl.php?id_syscom=" . $row['id_syscom'] . "'>&laquo; PAUSAR</a></b>";
+            echo "<b><a href='activaMl.php?id_syscom=" . $row['id_syscom'] . "'>&laquo; ACTIVAR</a></b>";
+
+
+            echo "</td></center>";
+            
+
+
 
         echo"</tr>";
     }

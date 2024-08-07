@@ -42,16 +42,6 @@ error_reporting(E_ALL);
 <body>
 
 <?php
-// $id_dominio=9999;
-
-// $v7="despliega";
-
-// if (!$v7) {
-// 	$v7="despliega";
-// }
-
-
-// if ($v7=="despliega") {
 
 
     echo '<form action="familias.php" method="post">';
@@ -64,21 +54,20 @@ error_reporting(E_ALL);
         echo '<input type="submit" name="productos_btn" value="Muestra Consulta">';
     echo '</form>';
 
+    echo "<br><br>";
+    echo '<form action="detalles_stock.php" method="post">';
+    echo '<input type="submit" name="detalle_btn" value="Detalle Reporte Stock">';
+    echo '</form>';
 
-// }
+    echo "<br><br>";
+    echo '<form action="creaTabla.php" method="post">';
+    echo '<input type="submit" name="detalle_btn" value="Inserta Datos">';
+    echo '</form>';
 
-
-echo '<form action="detalles_stock.php" method="post">';
-echo '<input type="submit" name="detalle_btn" value="Detalle Reporte Stock">';
-echo '</form>';
 
 echo "<br>";
 echo "<br>";
 
-
-// echo '<form action="delete.php" method="post">';
-// echo '<input type="submit" name="descarga_btn" value="delete">';
-// echo '</form>';
 
 
 ?>
