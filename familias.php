@@ -220,6 +220,11 @@ if ($manejador) {
 
                     }
 
+                    //Estatus Meli
+                    echo 'ESTATUS meli '.$data['status_meli'].'<br>';
+ 
+                    
+
                     // Convertir a texto Titulo
                     $data_text = $data['titulo'];
 

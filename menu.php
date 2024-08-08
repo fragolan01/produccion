@@ -47,7 +47,6 @@ error_reporting(E_ALL);
     echo '<form action="familias.php" method="post">';
     echo '<input type="submit" name="familias_btn" value="Genera Consulta">';
     echo '</form>';
-
     
 	echo "<br><br>";
     echo '<form action="todos_los_productos.php" method="post">';
@@ -60,8 +59,8 @@ error_reporting(E_ALL);
     echo '</form>';
 
     echo "<br><br>";
-    echo '<form action="creaTabla.php" method="post">';
-    echo '<input type="submit" name="detalle_btn" value="Inserta Datos">';
+    echo '<form action="alterTable.php" method="post">';
+    echo '<input type="submit" name="detalle_btn" value="BB y Tablas">';
     echo '</form>';
 
 

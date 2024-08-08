@@ -171,7 +171,8 @@ $sql = "
         t1.precio AS precio_hoy,
         t1.mxn_tot_venta,
         (SELECT precio FROM plataforma_ventas_temp WHERE id_syscom = t1.id_syscom AND fecha < t1.fecha ORDER BY fecha DESC LIMIT 1) AS precio_anterior,
-        t1.precio - COALESCE((SELECT precio FROM plataforma_ventas_temp WHERE id_syscom = t1.id_syscom AND fecha < t1.fecha ORDER BY fecha DESC LIMIT 1), 0) AS precio_difference
+        t1.precio - COALESCE((SELECT precio FROM plataforma_ventas_temp WHERE id_syscom = t1.id_syscom AND fecha < t1.fecha ORDER BY fecha DESC LIMIT 1), 0) AS precio_difference,
+        t1.status_meli
     FROM (
         SELECT
             id,
@@ -184,7 +185,8 @@ $sql = "
             precio,
             mxn_tot_venta,
             orden,
-            ROW_NUMBER() OVER (PARTITION BY id_syscom ORDER BY fecha DESC) AS rn
+            ROW_NUMBER() OVER (PARTITION BY id_syscom ORDER BY fecha DESC) AS rn,
+            status_meli
         FROM plataforma_ventas_temp
     ) AS t1
     WHERE t1.rn = 1
@@ -274,7 +276,7 @@ if($result_all-> num_rows > 0){
 
             // Estado Meli
             echo "<td><center>";
-            // echo "<center>" . $row['status_meli'] . "</center>";
+            echo "<center>" . $row['status_meli'] . "</center>";
             echo "</td></center>";
 
             // Botones Mercado libre    
