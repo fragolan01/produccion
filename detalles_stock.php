@@ -114,6 +114,7 @@ WHERE t1.fecha = (
 ";
 $result = $conn->query($sql_tc);
 
+
 $fechaConsulta = date("d-m-Y"); // Obtener la fecha actual en formato YYYY-MM-DD
 if( $result->num_rows > 0 ){
     echo '<table>';
@@ -138,6 +139,7 @@ if( $result->num_rows > 0 ){
 } else {
     echo "No se encontraron resultados";
 }
+
 
 $tc_especial = $float_tc;
 $costo_total_mxn = 0.0;
@@ -190,7 +192,6 @@ $sql = "
 ";
 
 $result_all = $conn->query($sql);
-
 
 
 if($result_all-> num_rows > 0){
@@ -283,9 +284,6 @@ if($result_all-> num_rows > 0){
             echo "<b><a href='activaMl.php?id_syscom=" . $row['id_syscom'] . "'>&laquo; ACTIVAR</a></b>";
             echo "</td></center>";
             
-
-
-
         echo"</tr>";
     }
 }

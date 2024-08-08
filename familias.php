@@ -241,6 +241,13 @@ if ($manejador) {
                         }
                     }
 
+                    // UPDATE ID_PUBLI MELI
+                    $sql_update = "UPDATE plataforma_ventas_temp pvt
+                    JOIN plataforma_ventas_meli pvm ON pvt.id_syscom = pvm.id_producto
+                    SET pvt.fk_meli_id = pvm.id
+                    WHERE pvt.fk_meli_id IS NULL";
+                    //$result_update = $this->DB->query($sql_update);
+                     
                 }
             
         } else {
