@@ -22,7 +22,7 @@ $token = $primeros_36_caracteres;
 
 // Datos a enviar en el cuerpo de la solicitud
 $data = array(
-    "status" => "paused"
+    "status" => "active"
 );
 
 // Convertir los datos a formato JSON
@@ -135,7 +135,7 @@ if (isset($_GET['id_syscom'])) {
             //         UPDATE 
             //             plataforma_ventas_temp pvt
             //         SET
-            //             pvt.status_meli = 0
+            //             pvt.status_meli = 1
             //         WHERE
             //             pvt.id_syscom =".$id_syscom;
 
