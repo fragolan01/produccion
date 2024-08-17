@@ -127,38 +127,39 @@ if (isset($_GET['id_syscom'])) {
             $select_stmt->execute();
             $select_stmt->store_result();
 
-            // if ($select_stmt->num_rows > 0) {
-            //     echo "Registro encontrado. Procediendo con el UPDATE.";
+            if ($select_stmt->num_rows > 0) {
+                echo "Registro encontrado. Procediendo con el UPDATE.";
 
-            //     // Update estado meli
-            //     $sql_status_ml = "
-            //         UPDATE 
-            //             plataforma_ventas_temp pvt
-            //         SET
-            //             pvt.status_meli = 1
-            //         WHERE
-            //             pvt.id_syscom =".$id_syscom;
+                // Update estado meli
+                $sql_status_ml = "
+                    UPDATE
+                        plataforma_ventas_meli pvm
+                    SET
+                        pvm.estado = 1
+                    WHERE
+                        pvm.id_producto = ?    
+                ";
 
-            //     // Preparar la declaración de actualización
-            //     if ($update_stmt = $conn->prepare($sql_status_ml)) {
-            //         // Vincular el parámetro
-            //         // $update_stmt->bind_param("s", $id_syscom);
+                // Preparar la declaración de actualización
+                if ($update_stmt = $conn->prepare($sql_status_ml)) {
+                    // Vincular el parámetro
+                    $update_stmt->bind_param("s", $id_syscom);
 
-            //         // Ejecutar la actualización
-            //         if ($update_stmt->execute()) {
-            //             echo "Estado actualizado correctamente en la base de datos.";
-            //         } else {
-            //             echo "Error al actualizar el estado en la base de datos: " . $update_stmt->error;
-            //         }
+                    // Ejecutar la actualización
+                    if ($update_stmt->execute()) {
+                        echo "Estado actualizado correctamente en la base de datos.";
+                    } else {
+                        echo "Error al actualizar el estado en la base de datos: " . $update_stmt->error;
+                    }
 
-            //         // Cerrar la declaración de actualización
-            //         $update_stmt->close();
-            //     } else {
-            //         echo "Error al preparar la consulta de actualización: " . $conn->error;
-            //     }
-            // } else {
-            //     echo "No se encontró ningún registro con id_syscom = $id_syscom.";
-            // }
+                    // Cerrar la declaración de actualización
+                    $update_stmt->close();
+                } else {
+                    echo "Error al preparar la consulta de actualización: " . $conn->error;
+                }
+            } else {
+                echo "No se encontró ningún registro con id_syscom = $id_syscom.";
+            }
 
             // Cerrar la declaración de selección
             $select_stmt->close();
