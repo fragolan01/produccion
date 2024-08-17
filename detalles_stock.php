@@ -275,9 +275,45 @@ if($result_all-> num_rows > 0){
             echo "</td></center>";
 
             // Estado Meli
-            echo "<td><center>";
-            echo "<center>" . $row['status_meli'] . "</center>";
-            echo "</td></center>";
+            // echo "<td><center>";
+            // echo "<center>" . $row['status_meli'] . "</center>";
+            // echo "</td></center>";
+            
+
+            // Consulta para obtener el iestado_meli
+            $sql_estado = "
+            SELECT 
+                pvm.estado 
+            FROM 
+                plataforma_ventas_meli pvm
+            WHERE
+                pvm.id_producto =".$row['id_syscom'];
+            
+            $result_meli = $conn->query($sql_estado);
+            
+            if($result_meli->num_rows > 0) {
+                while($row_meli = $result_meli->fetch_assoc()) {
+
+                    echo "<td><center>";
+
+                    // echo "<center>" .$row_meli['estado']. "</center>";
+
+                    if ($row_meli['estado'] == 1) {
+                        echo "<b><center><font color=green> ACTIVO </font></b></center>";
+                    } elseif ($row_meli['estado'] == 0) {
+                        echo "<b><center><font color=red> PAUSADO </font></b></center>";
+                    } else {
+                        echo 'Desconocido'; // Si el estado no es ni 0 ni 1
+                    }
+        
+                    echo "</td></center>";
+                }
+            } else {
+                echo "<td><center>";
+                echo "<center>" ."S/N PUBLI MLI". "</center>";
+                echo "</td></center>";
+
+            }
 
             // Botones Mercado libre    
             echo "<td><center>";
