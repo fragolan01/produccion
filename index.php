@@ -1,59 +1,45 @@
-<?
-
-    require($laraiz."config.php");
-
-    // alv agrega la consulta de la API SYSCOM
-    // require($laraiz."crea_bd_fragolan_syscom.php");
-    // require($laraiz."consulta_precio.php");
-    // require($laraiz."esquema_plataforma.php");
-
-    // Consulta productos
-    // require($laraiz."alter_table.php");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos</title>
 
 
-    // Consulta productos
-    require($laraiz."menu.php");
 
-    // Consulta productos
-    // require($laraiz."todos_los_productos.php");
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $.ajax({
+                url: 'your-server-endpoint', // Cambia esto por la URL del servidor que quieras consultar
+                method: 'GET',
+                success: function(response) {
+                    // Aquí puedes actualizar el contenido de la página con la respuesta
+                    // Ejemplo: $('#someElement').html(response);
+                    <iframe id="report" src="detalles_stock.php"></iframe>
+                    console.log(response); // Solo para depuración
+                },
+                error: function() {
+                    console.error('Error al obtener datos');
+                }
+            });
+        });
+    </script>
 
+</head>
+<body>
 
-    // Francisco
-    require($laraiz."plataforma_ventas_proveedores.php");
-/*
-    // alv agrega plataforma ventas envios
-    require($laraiz."plataforma_ventas_envios.php");
+    <style>
+    #report {
+    width: 100%;
+    height: 850px; /* Ajusta la altura según sea necesario */
+    border: none;
+    }
+    </style>
 
-    // alv agrega plataforma ventas marcas
-    require($laraiz."plataforma_ventas_marcas.php");
+    <!-- Agrega el iframe aquí -->
+    <iframe id="report" src="detalles_stock.php"></iframe>
 
-    // alv agrega plataforma ventas categos okokok
-    require($laraiz."plataforma_ventas_categos.php");
-
-    // alv agrega plataforma ventas Sub categos
-    require($laraiz."plataforma_ventas_sub_categos.php");
-
-    // alv agrega plataforma ventas plataformas
-    require($laraiz."plataforma_ventas_plataformas.php");
-
-    // alv agrega plataforma ventas plataformasm publicidad
-    //ERROR - NO DESGLOSA INSERCIONES
-    require($laraiz."plataforma_ventas_plataformas_publicidad.php");
-
-    // alv agrega plataforma_ventas_productos
-    require($laraiz."plataforma_ventas_productos.php");
-
-    // alv agrega plataforma_ventas_stock
-    require($laraiz."plataforma_ventas_stock.php");
-
-    // alv agrega plataforma_ventas_precio
-    require($laraiz."plataforma_ventas_precio.php");
-
-    // alv agrega plataforma_ventas_tipo_de_cambio
-    require($laraiz."plataforma_ventas_tipo_cambio.php");
-
-    */
-
-    echo "<br><br><font size=1>Copyright: Fragolan LP 2024</font>";
-
-?>
+</body>
+</html>

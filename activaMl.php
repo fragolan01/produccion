@@ -1,3 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>activaML</title>
+
+    <link rel="stylesheet" href="assets/css/style.css"/>
+
+</head>
+<body>
+    
+</body>
+</html>
+
 <?php
 // Muestra todos los errores excepto los de nivel de advertencia
 error_reporting(E_ALL & ~E_WARNING);
@@ -183,11 +198,24 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MercadoLibre</title>
+    <script>
+        function showAlertAndRedirect(message, redirectUrl) {
+            alert(message);
+            window.location.href = redirectUrl;
+        }
+    </script>
 </head>
 <body>
     <h1>Activar o Desactivar Publicación</h1>
 
-    <p>Accede a este script con un enlace que incluya el parámetro id_syscom en la URL.</p>
-    <p>Por ejemplo: <a href="?id_syscom=12345">Activar/Desactivar publicación para el producto 12345</a></p>
+    <?php
+    // PHP para manejar la respuesta de la API
+    if (isset($responseData)) {
+        $responseJson = json_encode($responseData);
+        echo "<script>
+            showAlertAndRedirect('PRODUCTO ACTIVO', 'index.html');
+        </script>";
+    }
+    ?>
 </body>
 </html>
