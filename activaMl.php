@@ -118,7 +118,7 @@ if (isset($_GET['id_syscom'])) {
 
             // Mostrar la respuesta
             echo "Respuesta de la API para id_pub_meli $id_pub_meli: ";
-            print_r($responseData);
+            // print_r($responseData);
         }
 
         // Liberar resultados antes de ejecutar la siguiente consulta
