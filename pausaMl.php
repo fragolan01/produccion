@@ -14,6 +14,8 @@
 </html>
 
 <?php
+include '../navbar.php';
+
 // Muestra todos los errores excepto los de nivel de advertencia
 error_reporting(E_ALL & ~E_WARNING);
 error_reporting(0);
