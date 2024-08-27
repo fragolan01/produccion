@@ -29,7 +29,7 @@ function renew_token($last_refresh_token) {
         $refresh_token = $token_info['refresh_token'];
 
         // Save the new access_token and refresh_token to a file
-        file_put_contents('tokens.json', json_encode($token_info));
+        file_put_contents('/token_ml/tokens.json', json_encode($token_info));
 
         return array($access_token, $refresh_token);
     } else {
@@ -40,8 +40,8 @@ function renew_token($last_refresh_token) {
 
 // Function to read the tokens from file
 function get_tokens() {
-    if (file_exists('token_ml/tokens.json')) {
-        $token_info = json_decode(file_get_contents('token_ml/tokens.json'), true);
+    if (file_exists('/token_ml/tokens.json')) {
+        $token_info = json_decode(file_get_contents('/token_ml/tokens.json'), true);
         if (isset($token_info['access_token']) && isset($token_info['refresh_token'])) {
             return array($token_info['access_token'], $token_info['refresh_token']);
         }
