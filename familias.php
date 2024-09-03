@@ -10,6 +10,7 @@
             margin-bottom: 10px;
         }
 
+
         input[type="submit"] {
             padding: 10px 20px;
             font-size: 16px;
@@ -31,6 +32,18 @@
 
 
 <?php
+
+$url = 'https://development.fragolan.com/token_ml/renuevatoken.php';
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$response = curl_exec($ch);
+curl_close($ch);
+
+// You can then use the $response variable to process the output
+echo $response;
+
+
+
 
 echo '<form action="menu.php" method="post">';
     echo '<input type="submit" name="consulta_btn" value="Inicio">';
