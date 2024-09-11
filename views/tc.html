@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TC</title>
+</head>
+<body>
+    {% include 'apartado/navbar.html' %}
+
+    <h1><center>Aqui el tipo de cambio</center></h1>
+
+    {% if tc_data.error %}
+        <p>Error: {{ tc_data.error }}</p>
+    {% else %}
+        <p>El tipo de cambio es: &nbsp; {{tc_data}}</p>
+        
+    {% endif %}
+
+</body>
+</html>
+

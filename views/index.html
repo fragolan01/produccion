@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Fragolan Linking People</title>
+    <!-- <link rel="stylesheet" href="css/estilos.css"> -->
+</head>
+<body>
+    {% include 'apartado/navbar.html' %}
+    <h1><center>DETALLE PRODUCTOS SYSCOM</center></h1>
+
+    <script>
+        $(document).ready(function(){
+            $('#home-link').click(function(e){
+                e.preventDefault();
+                $('#content-container').load('index.html');
+            });
+        });
+    </script>
+
+    <style>
+    #report {
+        width: 100%;
+        height: 850px; /* Ajusta la altura según sea necesario */
+        border: none;
+    }
+    </style>
+
+    <!-- Agrega el iframe aquí -->
+    <iframe id="report" src="detalles_stock.php"></iframe>
+
+
+</body>
+</html>

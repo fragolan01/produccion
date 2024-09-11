@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>familias</title>
+</head>
+<body>
+    
+    {% include 'apartado/navbar.html' %}
+    
+    <h1><center>Aqui productos SYSCOM </center></h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Orden</th>
+                <th>Producto ID</th>
+                <th>Título</th>
+                <th>Total Existencia</th>
+                <th>Inventario Mínimo</th>
+                <th>Total Venta (MXN)</th>
+                <th>Precio Descuento</th>
+                <th>Status Meli</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for producto in productos %}
+            <tr>
+                <td>{{ producto.orden }}</td>
+                <td>{{ producto.producto_id }}</td>
+                <td>{{ producto.titulo }}</td>
+                <td>{{ producto.total_existencia }}</td>
+                <td>{{ producto.inv_minimo }}</td>
+                <td>{{ producto.tot_venta_mxn }}</td>
+                <td>{{ producto.precio_descuento }}</td>
+                <td>{{ producto.status_meli }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+        
+    
+</body>
+</html>
