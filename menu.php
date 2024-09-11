@@ -59,8 +59,8 @@ error_reporting(E_ALL);
     echo '</form>';
 
     echo "<br><br>";
-    echo '<form action="alterTable.php" method="post">';
-    echo '<input type="submit" name="detalle_btn" value="BB y Tablas">';
+    echo '<form action="sendmail.php" method="post">';
+    echo '<input type="submit" name="detalle_btn" value="Mail">';
     echo '</form>';
 
 
