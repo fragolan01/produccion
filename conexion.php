@@ -1,4 +1,11 @@
 <?
+
+// Mostrar los errores en el navegador
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 //GENERAL
 $root = realpath($_SERVER["DOCUMENT_ROOT"]);
 $laraiz=$root."/";
@@ -19,6 +26,16 @@ $vpassword = "S15t3ma5@Fr4g0l4N";
 // Connecting, selecting database
 $link = mysql_connect($laipdelhost, $vusuario, $vpassword) or die('Could not connect: ' . mysql_error());
 mysql_select_db($vnombredb, $link) or die('Could not select database');
+
+// CONEXIÓN A BASE DE DATOS (ACTUALIZADA A MYSQLI)
+// $conn = new mysqli($laipdelhost, $vusuario, $vpassword, $vnombredb);
+
+// Verificar la conexión
+if ($conn->connect_error) {
+    die("Conexión fallida: " . $conn->connect_error);
+} else {
+    echo "Conexión exitosa!";
+}
 
 
 $diez_minutos=60*10;
