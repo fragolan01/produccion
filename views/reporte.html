@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte</title>
+</head>
+    {% include 'apartado/navbar.html' %}
+<body>
+
+    <table border='1'>
+        <thead>
+            <tr>
+                <th>ORDEN</th>
+                <th>FECHA CONSULTA</th>
+                <th>ID SYSCOM</th>
+                <th>NOMBRE</th>
+                <th>STOCK</th>
+                <th>INV. MINIMO</th>
+                <th>STATUS</th>
+                <th>PRECIO AYER</th>
+                <th>PRECIO HOY</th>
+                <th>DIFERENCIA</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in datos %}
+            <tr>
+                <td><center>{{ row.orden }}</center></td>
+                <td><center>{{ row.fecha }}</center></td>
+                <td><center>{{ row.id_syscom }}</center></td>
+                <td>{{ row.titulo }}</td>
+                <td><center>{{ row.stock }}</center></td>
+                <td><center>{{ row.inv_min }}</center></td>
+                <td>
+                    <center>
+                        {% if row.status == 1 %}
+                            <b><font color="green">ACTIVO</font></b>
+                        {% elseif row.status == 0 %}
+                            <b><font color="red">PAUSA</font></b>
+                        {% else %}
+                            Desconocido
+                        {% endif %}
+                    </center>
+                </td>
+                <td><center>{{ row.precio_anterior }}</center></td>
+                <td><center>{{ row.precio_hoy }}</center></td>
+                <td><center>
+                    {% if row.precio_difference < 0 %}
+                        <b><font color="green">{{ row.precio_difference }}</font></b>
+                    {% elseif row.precio_difference > 0 %}
+                        <b><font color="red">+{{ row.precio_difference }}</font></b>
+                    {% else %}
+                        <b><font>S/C</font></b>
+                    {% endif %}
+                </center></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>    
+    
+</body>
+</html>
