@@ -21,6 +21,9 @@
                 <th>PRECIO AYER</th>
                 <th>PRECIO HOY</th>
                 <th>DIFERENCIA</th>
+                <th>ESTADO MELI</th>
+                <th>CAMBIAR ESTADO</th>
+
             </tr>
         </thead>
         <tbody>
@@ -54,6 +57,11 @@
                         <b><font>S/C</font></b>
                     {% endif %}
                 </center></td>
+                <td><center><b><a href="pausaMl.php?id_syscom={{ row.id_syscom }}">&laquo; PAUSAR</a></b></center></td>
+                <!-- <td><center>{{ row.id_syscom }}</center></td> -->
+                <td><center><b><a href="pausaMl.php?id_syscom={{ row.id_syscom }}">&laquo; PAUSAR</a></b></center></td>
+                <!-- <td><center>{{ row.id_syscom }}</center></td> -->
+
             </tr>
             {% endfor %}
         </tbody>

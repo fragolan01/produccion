@@ -244,9 +244,12 @@ if($result_all-> num_rows > 0){
 
             echo "<td><center>";
                 if($row['precio_difference']<0){
-                    echo "<b><center> <font color=green>" . $row['precio_difference'] . "</font></b><center>";
+                    echo "<b><center> <font color=red>" . $row['precio_difference'] . "</font></b><center>";
+                        // echo "<b><center> <font color=green>" ."+". $row['precio_difference'] . "</font></b><center>";
+
                 }elseif($row['precio_difference']>0){
-                    echo "<b><center> <font color=red>" ."+". $row['precio_difference'] . "</font></b><center>";
+                    echo "<b><center> <font color=green>" ."+". $row['precio_difference'] . "</font></b><center>";
+                        // echo "<b><center> <font color=red>" . $row['precio_difference'] . "</font></b><center>";
                 }else{
                     echo "<b><center><font >  S/C </font></b></center>";
                 }
@@ -275,51 +278,15 @@ if($result_all-> num_rows > 0){
             echo "</td></center>";
 
             // Estado Meli
-            // echo "<td><center>";
-            // echo "<center>" . $row['status_meli'] . "</center>";
-            // echo "</td></center>";
-            
-
-            // Consulta para obtener el iestado_meli
-            $sql_estado = "
-            SELECT 
-                pvm.estado 
-            FROM 
-                plataforma_ventas_meli pvm
-            WHERE
-                pvm.id_producto =".$row['id_syscom'];
-            
-            $result_meli = $conn->query($sql_estado);
-            
-            if($result_meli->num_rows > 0) {
-                while($row_meli = $result_meli->fetch_assoc()) {
-
-                    echo "<td><center>";
-
-                    // echo "<center>" .$row_meli['estado']. "</center>";
-
-                    if ($row_meli['estado'] == 1) {
-                        echo "<b><center><font color=green> ACTIVO </font></b></center>";
-                    } elseif ($row_meli['estado'] == 0) {
-                        echo "<b><center><font color=red> PAUSADO </font></b></center>";
-                    } else {
-                        echo 'Desconocido'; // Si el estado no es ni 0 ni 1
-                    }
-        
-                    echo "</td></center>";
-                }
-            } else {
-                echo "<td><center>";
-                echo "<center>" ."S/N PUBLI MLI". "</center>";
-                echo "</td></center>";
-
-            }
+            echo "<td><center>";
+            echo "<center>" . $row['status'] . "</center>";
+            echo "</td></center>";
 
             // Botones Mercado libre    
             echo "<td><center>";
 
-            echo "<b><a href='pausaMl.php?id_syscom=" . $row['id_syscom'] . "'>&laquo; PAUSAR</a></b>";
-            echo "<b><a href='activaMl.php?id_syscom=" . $row['id_syscom'] . "'>&laquo; ACTIVAR</a></b>";
+            echo "<b><a href='pausaml.php?id_syscom=" . $row['id_syscom'] . "'>&laquo; PAUSAR</a></b>";
+            echo "<b><a href='activaml.php?id_syscom=" . $row['id_syscom'] . "'>&laquo; ACTIVAR</a></b>";
             echo "</td></center>";
             
         echo"</tr>";

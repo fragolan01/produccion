@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pausar Producto</title>
+</head>
+<body>
+    <h1>Pausar Producto en MercadoLibre</h1>
+    <form action="{{ path_for('pausar_producto') }}" method="POST">
+        <label for="id_syscom">ID Syscom:</label>
+        <input type="text" id="id_syscom" name="id_syscom" required>
+        <button type="submit">Pausar</button>
+    </form>
+</body>
+</html>
