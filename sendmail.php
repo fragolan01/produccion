@@ -26,7 +26,7 @@ $mensaje="El sistema realizó las siguientes Actualizaciones:<br><br>";
 
 //-----------Aquí van las Actualizaciones que se generaron:----------------------------
 
-$mensaje.="Segunda prueba Correcta";
+// $mensaje.="Segunda prueba Correcta";
 
 //-----NO TOCAR:--------------------------------------------------------------------------------
 
