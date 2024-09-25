@@ -111,10 +111,7 @@ class MeliModel {
             return "Error al preparar la consulta: " . $this->conn->error;
         }
     }
-    
-
-
-    
+        
     // Método para actualizar el estado del producto
     private function actualizarEstado($id_syscom) {
         $sql = "UPDATE plataforma_ventas_meli SET estado = 0 WHERE id_producto = ?";
