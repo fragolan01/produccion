@@ -1,8 +1,9 @@
 <?php
 
+require_once('./model/pausaMl_model.php');
+
 // Llamar al modelo
 require_once('./model/pausaMl_model.php');
-// require_once('./sendmail.php'); // Incluir el archivo de sendmail.php
 
 class MeliController {
     private $meliModel;
@@ -22,25 +23,13 @@ class MeliController {
             'mensaje' => $resultado['mensaje'],
             'log' => $resultado['log']
         ]);
+
+        // Enviar la notificación por correo con los detalles del producto pausado
+        $this->enviarNotificacion($resultado['log']);
     }
-    
 
-    /*
-    public function pausarProducto($id_syscom) {
-        // Pausar el producto y obtener el resultado
-        $resultado = $this->meliModel->pausarProducto($id_syscom);
-
-        // Enviar la notificación por correo usando la función enviarNotificacion
-        // $this->enviarNotificacion($id_syscom, $resultado);
-
-        // Mostrar el resultado en una vista usando Twig
-        echo $this->twig->render('pausaMl.html', ['resultado' => $resultado]);
-    }
-    */
-
-    /*
-    // Función para enviar una notificación por correo
-    private function enviarNotificacion($id_syscom, $mensaje) {
+    // Función para enviar una notificación por correo con los detalles del producto pausado
+    private function enviarNotificacion($log) {
         ini_set('display_errors', 1);
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
@@ -54,49 +43,35 @@ class MeliController {
         $vemailpassword = "l3&WQR@Dh9#A";
 
         // Asunto y cuerpo del correo
-        $asunto = "Email de Actualizaciones de " . $vempresa . " (Mail ID: " . $mailid . ")";
-        $mensajeCorreo = "Producto con id_syscom: $id_syscom ha sido pausado.\nMensaje: $mensaje";
+        $asunto = "Producto pausado en MercadoLibre (Mail ID: $mailid)";
 
-        // Formato HTML y de texto
-        $elhtml = nl2br($mensajeCorreo);
-        $mensaje = strip_tags($mensajeCorreo);
-        $from = $vemail;
-        $to = $vemail;
-        $replyto = $vemail;
+        // Construir el mensaje con los detalles del log
+        $mensajeCorreo = "
+            <html>
+            <body>
+                <h2>Detalles del Producto Pausado</h2>
+                <p><strong>Motivo:</strong> {$log['motivo']}</p>
+                <p><strong>Título:</strong> {$log['titulo']}</p>
+                <p><strong>ID Publicación MercadoLibre:</strong> {$log['id_pub_meli']}</p>
+                <p><strong>ID Producto Syscom:</strong> {$log['id_producto']}</p>
+                <p><strong>Estado en MercadoLibre:</strong> {$log['status_meli']}</p>
+            </body>
+            </html>
+        ";
+
+        // Formato del mensaje
         $boundary = uniqid();
-        $content_type = 'text/html; boundary=' . $boundary;
-        $lafechamail = date(DATE_RFC2822);
-        $body = $elhtml;
+        $headers = "From: $vemail\r\n";
+        $headers .= "Reply-To: $vemail\r\n";
+        $headers .= "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
 
-        // Cabeceras
-        $headers = array(
-            'From' => $from,
-            'To' => $to,
-            'Subject' => $asunto,
-            'Reply-To' => $replyto,
-            'MIME-Version' => '1.0',
-            'Content-Type' => $content_type,
-            'Date' => $lafechamail
-        );
-
-        // Enviar correo usando PEAR Mail
-        $smtp = Mail::factory('smtp', array(
-            'host' => $vemailhost,
-            'auth' => true,
-            'username' => $vemailusuario,
-            'password' => $vemailpassword
-        ));
-
-        $mail = $smtp->send($to, $headers, $body);
-
-        // Manejar errores
-        if (PEAR::isError($mail)) {
-            echo "<br><br>Ocurrió un Error:<br><br>" . $mail->getMessage() . "<br>";
+        // Enviar correo usando mail() de PHP
+        if (mail($vemail, $asunto, $mensajeCorreo, $headers)) {
+            echo "<br><br>Correo enviado con éxito!";
         } else {
-            echo "<br><br>Mail enviado!";
+            echo "<br><br>Error al enviar el correo.";
         }
     }
-    */
 }
-
 ?>
