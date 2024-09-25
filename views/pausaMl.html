@@ -6,7 +6,18 @@
     <title>Resultado de Pausa</title>
 </head>
 <body>
+   
     <h1>Resultado de la Operación</h1>
-    <p>{{ resultado }}</p>
+    <p>{{ mensaje }}</p>
+    
+    <h2>Detalles del Producto Pausado</h2>
+    <ul>
+        <li><strong>Motivo:</strong> {{ log.motivo }}</li>
+        <li><strong>Título:</strong> {{ log.titulo }}</li>
+        <li><strong>ID Publicación MercadoLibre:</strong> {{ log.id_pub_meli }}</li>
+        <li><strong>ID Producto Syscom:</strong> {{ log.id_producto }}</li>
+        <li><strong>Estado en MercadoLibre:</strong> {{ log.status_meli }}</li>
+    </ul>
+    
 </body>
 </html>

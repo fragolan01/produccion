@@ -5,7 +5,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // require_once 'db/conexion.php'; // Conexión a la base de datos
-// require_once 'model/pausaMl_model.php';
+require_once 'model/pausaMl_model.php';
 require_once 'controller/pausaMl_controller.php';
 
 require_once 'lib/Twig/Autoloader.php';

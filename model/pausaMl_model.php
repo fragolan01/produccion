@@ -15,11 +15,6 @@ if ($conn->connect_error) {
     die("Error de conexión: " . $conn->connect_error);
 }
 
-// Verifica la conexión
-if ($conn->connect_error) {
-    die("Error de conexión: " . $conn->connect_error);
-}
-
 class MeliModel {
     private $conn;
     private $token;
@@ -40,11 +35,12 @@ class MeliModel {
         return $meliToken->getTokenMeli();
     }
 
+    // 25-09-24
     // Método para pausar un producto en MercadoLibre
     public function pausarProducto($id_syscom) {
         // URL base de la API
         $url_base = "https://api.mercadolibre.com/items/";
-
+    
         // Consulta para obtener id_pub_meli
         $sql = "
             SELECT 
@@ -59,7 +55,7 @@ class MeliModel {
                 pvm.id_pub_meli DESC
             LIMIT 1
         ";
-
+    
         if ($stmt = $this->conn->prepare($sql)) {
             $stmt->bind_param("s", $id_syscom);
             $stmt->execute();
@@ -68,11 +64,11 @@ class MeliModel {
             if ($stmt->fetch()) {
                 // Construir la URL completa para la solicitud PUT
                 $url = $url_base . $id_pub_meli;
-
+    
                 // Datos a enviar
                 $data = array("status" => "paused");
                 $jsonData = json_encode($data);
-
+    
                 // Opciones HTTP para la solicitud PUT
                 $options = array(
                     'http' => array(
@@ -85,45 +81,42 @@ class MeliModel {
                         'content' => $jsonData
                     )
                 );
-
+    
                 $context = stream_context_create($options);
-
+    
                 // Realizar la solicitud PUT
                 $response = file_get_contents($url, false, $context);
-
-            
+    
                 if ($response === FALSE) {
-                    $stmt->close();  // Aseguramos cerrar el statement en caso de error
+                    $stmt->close();
                     return 'Error al realizar la solicitud';
                 }
-
-                // Cerrar el statement y liberar resultados
-                $stmt->close();  // Cierra el statement después del SELECT
-
+    
                 // Llamar a actualizarEstado después de pausar el producto
                 $this->actualizarEstado($id_syscom);
-
+    
                 // Registrar el log después de actualizar el estado
-                $this->registrarLog($id_syscom, $id_pub_meli, "paused");
-
-
-                 // Finalizar con el return
-                return "Producto pausado correctamente.";
-
+                $log = $this->registrarLog($id_syscom, $id_pub_meli, "paused");
+    
+                // Devolver el resultado completo (log + mensaje de éxito)
+                return [
+                    'mensaje' => "Producto pausado correctamente.",
+                    'log' => $log
+                ];
             } else {
-                $stmt->close();  // Aseguramos cerrar el statement si no hay resultados
+                $stmt->close();
                 return "No se encontró ningún registro con id_syscom = $id_syscom.";
             }
-
         } else {
             return "Error al preparar la consulta: " . $this->conn->error;
-        
         }
-        
     }
-              
-       // Método para actualizar el estado del producto
-       private function actualizarEstado($id_syscom) {
+    
+
+
+    
+    // Método para actualizar el estado del producto
+    private function actualizarEstado($id_syscom) {
         $sql = "UPDATE plataforma_ventas_meli SET estado = 0 WHERE id_producto = ?";
         if ($stmt = $this->conn->prepare($sql)) {
             $stmt->bind_param("s", $id_syscom);
@@ -131,7 +124,6 @@ class MeliModel {
             $stmt->close();
         }
     }
-
     
     private function registrarLog($id_syscom, $id_pub_meli, $estado) {
         $motivo = "Ejemplo de motivo";
@@ -144,7 +136,16 @@ class MeliModel {
             $stmt->execute();
             $stmt->close();
         }
+
+        // 25-09-24
+        // Devolver un array con la información
+        return [
+            'motivo' => $motivo,
+            'titulo' => $titulo,
+            'id_pub_meli' => $id_pub_meli,
+            'id_producto' => $id_syscom,
+            'status_meli' => $estado
+        ];
     }
     
-
 }

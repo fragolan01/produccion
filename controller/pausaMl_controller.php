@@ -2,7 +2,7 @@
 
 // Llamar al modelo
 require_once('./model/pausaMl_model.php');
-require_once('./sendmail.php'); // Incluir el archivo de sendmail.php
+// require_once('./sendmail.php'); // Incluir el archivo de sendmail.php
 
 class MeliController {
     private $meliModel;
@@ -16,14 +16,29 @@ class MeliController {
     public function pausarProducto($id_syscom) {
         // Pausar el producto y obtener el resultado
         $resultado = $this->meliModel->pausarProducto($id_syscom);
+    
+        // Mostrar el resultado en una vista usando Twig
+        echo $this->twig->render('pausaMl.html', [
+            'mensaje' => $resultado['mensaje'],
+            'log' => $resultado['log']
+        ]);
+    }
+    
+
+    /*
+    public function pausarProducto($id_syscom) {
+        // Pausar el producto y obtener el resultado
+        $resultado = $this->meliModel->pausarProducto($id_syscom);
 
         // Enviar la notificación por correo usando la función enviarNotificacion
-        $this->enviarNotificacion($id_syscom, $resultado);
+        // $this->enviarNotificacion($id_syscom, $resultado);
 
         // Mostrar el resultado en una vista usando Twig
         echo $this->twig->render('pausaMl.html', ['resultado' => $resultado]);
     }
+    */
 
+    /*
     // Función para enviar una notificación por correo
     private function enviarNotificacion($id_syscom, $mensaje) {
         ini_set('display_errors', 1);
@@ -81,6 +96,7 @@ class MeliController {
             echo "<br><br>Mail enviado!";
         }
     }
+    */
 }
 
 ?>
