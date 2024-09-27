@@ -16,15 +16,6 @@
     <p>Estado: {{ resultado.status_meli }}</p>
     <p>Motivo: {{ resultado.motivo }}</p>
 
-    <h2>Actualizar Motivo</h2>
-    <form action="/ruta/a/tu/controlador" method="POST">
-        <input type="hidden" name="id_pub_meli" value="{{ resultado.id_pub_meli }}">
-        <input type="hidden" name="id_producto" value="{{ resultado.id_producto }}">
-        <input type="hidden" name="status_meli" value="{{ resultado.status_meli }}">
-        <label for="motivo">Nuevo Motivo:</label>
-        <input type="text" id="motivo" name="motivo" value="{{ resultado.motivo }}" required>
-        <button type="submit">Actualizar Motivo</button>
-    </form>
 
 </body>
 </html>
