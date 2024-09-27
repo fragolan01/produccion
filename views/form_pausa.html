@@ -1,16 +1,30 @@
-<!DOCTYPE html>
+: <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pausar Producto</title>
+    <title>Resultado de Pausa</title>
 </head>
 <body>
-    <h1>Pausar Producto en MercadoLibre</h1>
-    <form action="{{ path_for('pausar_producto') }}" method="POST">
-        <label for="id_syscom">ID Syscom:</label>
-        <input type="text" id="id_syscom" name="id_syscom" required>
-        <button type="submit">Pausar</button>
+    <h1>Resultado de la Operación</h1>
+    
+    <p>Folio: {{ resultado.id }}</p>
+    <p>{{ resultado.fecha }}</p>
+    <p>Título: {{ resultado.titulo }}</p>
+    <p>ID Publicación: {{ resultado.id_pub_meli }}</p>
+    <p>ID Producto: {{ resultado.id_producto }}</p>
+    <p>Estado: {{ resultado.status_meli }}</p>
+    <p>Motivo: {{ resultado.motivo }}</p>
+
+    <h2>Actualizar Motivo</h2>
+    <form action="/ruta/a/tu/controlador" method="POST">
+        <input type="hidden" name="id_pub_meli" value="{{ resultado.id_pub_meli }}">
+        <input type="hidden" name="id_producto" value="{{ resultado.id_producto }}">
+        <input type="hidden" name="status_meli" value="{{ resultado.status_meli }}">
+        <label for="motivo">Nuevo Motivo:</label>
+        <input type="text" id="motivo" name="motivo" value="{{ resultado.motivo }}" required>
+        <button type="submit">Actualizar Motivo</button>
     </form>
+
 </body>
 </html>

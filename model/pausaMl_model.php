@@ -1,11 +1,10 @@
 <?php
 
-// Conexion a base de datos
-
-$servername = "localhost"; // Servidor de base de datos
-$username = "fragcom_develop"; // Usuario de MySQL
-$password = "S15t3ma5@Fr4g0l4N"; // Contraseña de MySQL
-$database = "fragcom_develop"; // base de datos
+// Conexión a la base de datos
+$servername = "localhost";
+$username = "fragcom_develop";
+$password = "S15t3ma5@Fr4g0l4N";
+$database = "fragcom_develop";
 
 // Conexión a la base de datos
 $conn = new mysqli($servername, $username, $password, $database);
@@ -21,9 +20,9 @@ class MeliModel {
 
     public function __construct($conn) {
         $this->conn = $conn;
-        // Obtener el token de autenticación
-        $this->token = $this->getTokenMeli();
+        $this->token = $this->getTokenMeli(); // Reemplaza con tu token de acceso válido
     }
+
 
     // Método para obtener el token de autenticación
     public function getTokenMeli() {
@@ -34,17 +33,17 @@ class MeliModel {
         // Llamar al método getTokenMeli() y devolver el token
         return $meliToken->getTokenMeli();
     }
+    
 
-    // 25-09-24
-    // Método para pausar un producto en MercadoLibre
+    // Función para pausar un producto en MercadoLibre
     public function pausarProducto($id_syscom) {
         // URL base de la API
         $url_base = "https://api.mercadolibre.com/items/";
-    
+
         // Consulta para obtener id_pub_meli
         $sql = "
             SELECT 
-                pvm.id_pub_meli, pvt.titulo, pvm.estado
+                pvm.fecha AS fecha, pvm.id_pub_meli, pvt.titulo, pvm.estado
             FROM 
                 plataforma_ventas_meli pvm
             JOIN
@@ -53,22 +52,22 @@ class MeliModel {
                 pvm.id_producto = ?
             ORDER BY 
                 pvm.id_pub_meli DESC
-            LIMIT 1
+            LIMIT 1        
         ";
-    
+
         if ($stmt = $this->conn->prepare($sql)) {
             $stmt->bind_param("s", $id_syscom);
             $stmt->execute();
-            $stmt->bind_result($id_pub_meli, $titulo, $estado);
+            $stmt->bind_result($fecha, $id_pub_meli, $titulo, $estado);            
             
             if ($stmt->fetch()) {
                 // Construir la URL completa para la solicitud PUT
                 $url = $url_base . $id_pub_meli;
-    
+
                 // Datos a enviar
                 $data = array("status" => "paused");
                 $jsonData = json_encode($data);
-    
+
                 // Opciones HTTP para la solicitud PUT
                 $options = array(
                     'http' => array(
@@ -81,68 +80,91 @@ class MeliModel {
                         'content' => $jsonData
                     )
                 );
-    
+
                 $context = stream_context_create($options);
-    
+
                 // Realizar la solicitud PUT
                 $response = file_get_contents($url, false, $context);
-    
+
                 if ($response === FALSE) {
-                    $stmt->close();
+                    $stmt->close();  // Aseguramos cerrar el statement en caso de error
                     return 'Error al realizar la solicitud';
                 }
-    
-                // Llamar a actualizarEstado después de pausar el producto
+
+                // Cerrar el statement después del SELECT
+                $stmt->close();  
+
+                // Actualizar el estado del producto
                 $this->actualizarEstado($id_syscom);
-    
-                // Registrar el log después de actualizar el estado
-                $log = $this->registrarLog($id_syscom, $id_pub_meli, "paused");
-    
-                // Devolver el resultado completo (log + mensaje de éxito)
-                return [
-                    'mensaje' => "Producto pausado correctamente.",
-                    'log' => $log
-                ];
+
+                // Registrar el log y obtener el título insertado
+                $tituloInserted = $this->registrarLog($id_syscom, $id_pub_meli, "paused", $titulo, $fecha);
+
+                // Devolver el título insertado
+                return $tituloInserted;
+
             } else {
-                $stmt->close();
+                $stmt->close();  // Cerrar si no hay resultados
                 return "No se encontró ningún registro con id_syscom = $id_syscom.";
             }
+
         } else {
             return "Error al preparar la consulta: " . $this->conn->error;
         }
     }
-        
-    // Método para actualizar el estado del producto
+
+    // Función para actualizar el estado del producto en la base de datos
     private function actualizarEstado($id_syscom) {
         $sql = "UPDATE plataforma_ventas_meli SET estado = 0 WHERE id_producto = ?";
+        
         if ($stmt = $this->conn->prepare($sql)) {
             $stmt->bind_param("s", $id_syscom);
             $stmt->execute();
             $stmt->close();
+        } else {
+            return "Error al preparar la actualización: " . $this->conn->error;
         }
     }
-    
-    private function registrarLog($id_syscom, $id_pub_meli, $estado) {
-        $motivo = "Ejemplo de motivo";
-        $titulo = "titulo"; // Asignar "titulo" a una variable
+
+
+    // Función para registrar el log de la operación
+    private function registrarLog($id_syscom, $id_pub_meli, $estado, $titulo, $fecha) {
+        
+        // Registrar el log de la operación
+        $motivo = "DOLAR";
         $sql = "INSERT INTO plataforma_ventas_log_meli (fecha, status_meli, id_pub_meli, id_producto, titulo, motivo) VALUES (NOW(), ?, ?, ?, ?, ?)";
         
         if ($stmt = $this->conn->prepare($sql)) {
-            // Pasar la variable $titulo en lugar de la cadena literal "titulo"
             $stmt->bind_param("sssss", $estado, $id_pub_meli, $id_syscom, $titulo, $motivo);
             $stmt->execute();
             $stmt->close();
+        } else {
+            return "Error al registrar el log: " . $this->conn->error;
         }
-
-        // 25-09-24
-        // Devolver un array con la información
+        
+        // Consulta para obtener el último id insertado en la tabla plataforma_ventas_log_meli
+        $sql_select = "SELECT MAX(id) AS folio FROM plataforma_ventas_log_meli WHERE id_producto = ?";
+        
+        if ($stmt_select = $this->conn->prepare($sql_select)) {
+            $stmt_select->bind_param("s", $id_syscom);
+            $stmt_select->execute();
+            $stmt_select->bind_result($id); // Obtiene el último id (folio)
+            $stmt_select->fetch();
+            $stmt_select->close();
+        } else {
+            return "Error al obtener el último id: " . $this->conn->error;
+        }
+        
+        // Devolver un array con la información, incluyendo el id recién insertado
         return [
-            'motivo' => $motivo,
+            'id' => $id,  // El id del registro recién insertado
             'titulo' => $titulo,
             'id_pub_meli' => $id_pub_meli,
             'id_producto' => $id_syscom,
-            'status_meli' => $estado
+            'status_meli' => $estado,
+            'motivo' => $motivo,
+            'fecha' => $fecha
         ];
-    }
-    
+    }    
+
 }

@@ -1,5 +1,21 @@
 <?php
 
+// Conexión a la base de datos
+$servername = "localhost";
+$username = "fragcom_develop";
+$password = "S15t3ma5@Fr4g0l4N";
+$database = "fragcom_develop";
+
+// Conexión a la base de datos
+$conn = new mysqli($servername, $username, $password, $database);
+
+// Verifica la conexión
+if ($conn->connect_error) {
+    die("Error de conexión: " . $conn->connect_error);
+}
+
+
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);

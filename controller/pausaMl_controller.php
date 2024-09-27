@@ -1,9 +1,7 @@
 <?php
 
-require_once('./model/pausaMl_model.php');
+require_once('./model/pausaMl_model.php'); // Llamar al modelo
 
-// Llamar al modelo
-require_once('./model/pausaMl_model.php');
 
 class MeliController {
     private $meliModel;
@@ -15,9 +13,34 @@ class MeliController {
     }
 
     public function pausarProducto($id_syscom) {
+        $tituloInserted = $this->meliModel->pausarProducto($id_syscom);
+
+        echo $this->twig->render('pausaMl.html', ['resultado' => $tituloInserted]);
+    }
+
+}
+
+/*
+class MeliController {
+    private $meliModel;
+    private $twig;
+
+    public function __construct($conn, $twig) {
+        // Inicializar el modelo y Twig
+        $this->meliModel = new MeliModel($conn);  // Ajuste en el nombre del modelo
+        $this->twig = $twig;
+    }
+
+    public function pausarProducto($id_syscom) {
         // Pausar el producto y obtener el resultado
         $resultado = $this->meliModel->pausarProducto($id_syscom);
-    
+
+        // Verificar si se obtuvo un resultado correcto
+        if (!$resultado) {
+            echo "Error al pausar el producto.";
+            return;
+        }
+
         // Mostrar el resultado en una vista usando Twig
         echo $this->twig->render('pausaMl.html', [
             'mensaje' => $resultado['mensaje'],
@@ -28,6 +51,7 @@ class MeliController {
         $this->enviarNotificacion($resultado['log']);
     }
 
+    
     // Función para enviar una notificación por correo con los detalles del producto pausado
     private function enviarNotificacion($log) {
         ini_set('display_errors', 1);
@@ -59,8 +83,7 @@ class MeliController {
             </html>
         ";
 
-        // Formato del mensaje
-        $boundary = uniqid();
+        // Configurar las cabeceras del correo
         $headers = "From: $vemail\r\n";
         $headers .= "Reply-To: $vemail\r\n";
         $headers .= "MIME-Version: 1.0\r\n";
@@ -73,5 +96,7 @@ class MeliController {
             echo "<br><br>Error al enviar el correo.";
         }
     }
+    
 }
 ?>
+*/
