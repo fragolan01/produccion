@@ -8,23 +8,31 @@
     <link rel="stylesheet" href="./assets/bootstrap/css/bootstrap.min.css">
 </head>
     {% include 'apartado/navbar.html' %}
+    <br>
+    <br>
 <body>
+    <h1><center>DETALLE PRODUCTOS SYSCOM</center></h1>
+    <br>
+    <br>
 
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
-                <th>ORDEN</th>
-                <th>FECHA CONSULTA</th>
-                <th>ID SYSCOM</th>
-                <th>NOMBRE</th>
-                <th>STOCK</th>
-                <th>INV. MINIMO</th>
-                <th>STATUS</th>
-                <th>PRECIO AYER</th>
-                <th>PRECIO HOY</th>
-                <th>DIFERENCIA</th>
-                <th>ESTADO MELI</th>
-                <th>CAMBIAR ESTADO</th>
+                <th><center>ORDEN</center></th>
+                <th><center>ID SYSCOM</center></th>
+                <th><center>PRODUCTO</center></th>
+                <th><center>STOCK</center></th>
+                <th><center>INV. MINIMO</center></th>
+                <th><center>STATUS</center></th>
+                <th><center>PRECIO AYER</center></th>
+                <th><center>PRECIO HOY</center></th>
+                <th><center>DIFERENCIA</center></th>
+                <th><center>IVA (USD)</center></th>
+                <th><center>TOTAL (USD)</center></th>
+                <th><center>COSTO (MXN)</center></th>
+                <th><center>TOT VENTA (MXN)</center></th>
+                <th><center>UTILIDAD (MXN)</center></th>
+                <th><center>ESTADO MELI</center></th>
 
             </tr>
         </thead>
@@ -32,7 +40,6 @@
             {% for row in datos %}
             <tr>
                 <td><center>{{ row.orden }}</center></td>
-                <td><center>{{ row.fecha }}</center></td>
                 <td><center>{{ row.id_syscom }}</center></td>
                 <td>{{ row.titulo }}</td>
                 <td><center>{{ row.stock }}</center></td>
@@ -59,10 +66,22 @@
                         <b><font>S/C</font></b>
                     {% endif %}
                 </center></td>
-                <td><center><b><a href="pausaMl.php?id_syscom={{ row.id_syscom }}">&laquo; PAUSAR</a></b></center></td>
-                <!-- <td><center>{{ row.id_syscom }}</center></td> -->
-                <td><center><b><a href="pausaMl.php?id_syscom={{ row.id_syscom }}">&laquo; PAUSAR</a></b></center></td>
-                <!-- <td><center>{{ row.id_syscom }}</center></td> -->
+
+                <td><center>{{ row.precio_iva }}</center></td>
+                <td><center>{{ row.precio_hoy }}</center></td>
+                <td><center>{{ row.costo_total_mxn}}</center></td>
+                <td><center>{{ row.mxn_tot_venta}}</center></td>
+                <td><center>{{ row.utilidad_round}}</center></td>
+
+                <td><center>
+                    {% if row.estado_meli == 1 %}
+                        <b><font color="green">ACTIVO</font></b>
+                    {% elseif row.estado_meli == 0 %}
+                        <b><font color="red">PAUSA</font></b>
+                    {% else %}
+                        S/N PUBLI. MELI
+                    {% endif %}
+                    </center></td>
 
             </tr>
             {% endfor %}
