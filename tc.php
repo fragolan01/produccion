@@ -1,6 +1,6 @@
 <?php
 
-require_once 'controller/tc_controller.php';
+require_once './controller/tc_controller.php';
 
 require_once 'lib/Twig/Autoloader.php';
 Twig_Autoloader::register();

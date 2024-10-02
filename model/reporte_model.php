@@ -91,12 +91,20 @@ class Reporte {
             $datos = $result->fetch_all(MYSQLI_ASSOC);
 
             foreach ($datos as &$fila) {
-                // Precio de hoy usd
-                $precio_iva = round(floatval($fila['precio_hoy'] * (1 + $this->iva)), 2, PHP_ROUND_HALF_UP);
+
+                $iva = 0.16;
+
+                // IVA (USD)
+                // $precio_iva = round(floatval($fila['precio_hoy'] * (1 + $this->iva)), 2, PHP_ROUND_HALF_UP);
+                $precio_iva = round(floatval($fila['precio_hoy']*$iva), 2, PHP_ROUND_HALF_UP);
                 $fila['precio_iva'] = $precio_iva;
 
-                // Precio hoy 
+                // TOTAL (USD)
                 $precio_total = round(floatval($precio_iva) + floatval($fila["precio_hoy"]), 2, PHP_ROUND_HALF_UP);
+
+                // COSTO (MXN)
+                $precio_total = round(floatval($precio_iva) + floatval($fila["precio_hoy"]), 2, PHP_ROUND_HALF_UP);
+
                 $fila['precio_total'] = $precio_total;
                 
                 //Conto total mx  

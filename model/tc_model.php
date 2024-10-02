@@ -42,4 +42,49 @@ class tc_model {
             return $data['normal']; // Devolver el JSON decodificado
         }        
     }
+
+
+    // // Método para insertar el tipo de cambio en la tabla `plataforma_ventas_tipo_cambio`
+    // public function insertarTipoCambio($id_dominio, $float_tc) {
+    //     global $conn;
+
+    //     // Consulta SQL preparada para la inserción con placeholders `?`
+    //     $sql = "INSERT INTO plataforma_ventas_tipo_cambio (id_dominio, fecha, normal) 
+    //             VALUES (?, NOW(), ?)";
+
+    //     // Preparar la consulta
+    //     $stmt = $conn->prepare($sql);
+
+    //     if ($stmt === false) {
+    //         die('Error en la preparación de la consulta: ' . $conn->error);
+    //     }
+
+    //     // Enlazar los parámetros a los placeholders
+    //     $stmt->bind_param("id", $id_dominio, $float_tc);
+
+    //     // Ejecutar la consulta
+    //     if ($stmt->execute()) {
+    //         echo "Inserción exitosa";
+    //     } else {
+    //         echo "Error al insertar: " . $stmt->error;
+    //     }
+
+    //     // Cerrar el statement
+    //     $stmt->close();
+    // }
+    
 }
+
+/*
+// Uso del modelo para obtener el tipo de cambio y realizar la inserción
+$tc_model = new tc_model();
+$float_tc = $tc_model->get_tc();  // Obtener el tipo de cambio de la API
+
+if (!isset($float_tc['error'])) {
+    $id_dominio = 9999;  // ID del dominio a insertar
+    $tc_model->insertarTipoCambio($id_dominio, $float_tc);  // Insertar en la base de datos
+} else {
+    echo $float_tc['error'];  // Mostrar error si ocurre
+}
+    
+*/
