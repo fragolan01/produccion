@@ -15,18 +15,18 @@ class MeliController {
 
     public function activarProducto($id_syscom) {
 
-        // Obtenemos los detalles del producto pausado
+        // Obtenemos los detalles del producto activado
         $tituloInserted = $this->meliModel->activarProducto($id_syscom);
 
         // Mostrar el resultado en una vista usando Twig
         echo $this->twig->render('activaMl.html', ['resultado' => $tituloInserted]);
 
-        // Enviar la notificación por correo con los detalles del producto pausado
+        // Enviar la notificación por correo con los detalles del producto activado
         $this->enviarNotificacion($tituloInserted);
 
     }
 
-    // Función para enviar una notificación por correo con los detalles del producto pausado
+    // Función para enviar una notificación por correo con los detalles del producto activado
     private function enviarNotificacion($tituloInserted) {
         ini_set('display_errors', 1);
         ini_set('display_startup_errors', 1);
@@ -41,13 +41,13 @@ class MeliController {
         $vemailpassword = "l3&WQR@Dh9#A";
 
         // Asunto y cuerpo del correo
-        $asunto = "Producto pausado en MercadoLibre (Mail ID: $mailid)";
+        $asunto = "Producto Activado en MercadoLibre (Mail ID: $mailid)";
 
         // Construir el mensaje con los detalles del log (asegúrate de que las claves del array son correctas)
         $mensajeCorreo = "
             <html>
             <body>
-                <h2>Detalles del Producto Pausado</h2>
+                <h2>Detalles del Producto Activado</h2>
                 <p><strong>Folio: </strong> {$tituloInserted['id']}</p>
                 <p><strong>Fecha: </strong> {$tituloInserted['fecha']}</p>
                 <p><strong>Título: </strong> {$tituloInserted['titulo']}</p>
