@@ -1,6 +1,8 @@
 <?php
 
-require_once('./model/pausaMl_model.php'); // Llamar al modelo
+//Llamar al modedlo
+require_once('./model/activaMl_model.php');
+
 
 class MeliController {
     private $meliModel;
@@ -11,15 +13,17 @@ class MeliController {
         $this->twig = $twig;
     }
 
-    public function pausarProducto($id_syscom) {
-        // Obtenemos los detalles del producto pausado
-        $tituloInserted = $this->meliModel->pausarProducto($id_syscom);
+    public function activarProducto($id_syscom) {
 
-        // Renderizamos la vista con Twig
-        echo $this->twig->render('pausaMl.html', ['resultado' => $tituloInserted]);
+        // Obtenemos los detalles del producto pausado
+        $tituloInserted = $this->meliModel->activarProducto($id_syscom);
+
+        // Mostrar el resultado en una vista usando Twig
+        echo $this->twig->render('activaMl.html', ['resultado' => $tituloInserted]);
 
         // Enviar la notificación por correo con los detalles del producto pausado
         $this->enviarNotificacion($tituloInserted);
+
     }
 
     // Función para enviar una notificación por correo con los detalles del producto pausado
@@ -68,4 +72,8 @@ class MeliController {
             echo "<br><br>Error al enviar el correo.";
         }
     }
+    
+
 }
+
+?>

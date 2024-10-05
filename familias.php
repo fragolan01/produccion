@@ -284,5 +284,4 @@ if ($manejador) {
     echo "Error: No se pudo abrir el archivo.\n";
 }
 
-
 ?>
