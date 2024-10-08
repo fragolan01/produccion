@@ -5,7 +5,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 
-require "/opt/cpanel/ea-php54/root/usr/share/pear/Mail.php";
+// require "/opt/cpanel/ea-php54/root/usr/share/pear/Mail.php";
 
 //----------------Estas variables de Dominio las dejamos asi por el momento de favor:--------------
 

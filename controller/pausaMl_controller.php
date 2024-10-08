@@ -1,6 +1,18 @@
 <?php
 
+// Muestra todos los errores excepto los de nivel de advertencia
+error_reporting(E_ALL & ~E_WARNING);
+error_reporting(0);
+
+// Mostrar los errores en el navegador
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 require_once('./model/pausaMl_model.php'); // Llamar al modelo
+require_once ('/opt/cpanel/ea-php54/root/usr/share/pear/Mail.php');
+
 
 class MeliController {
     private $meliModel;
@@ -15,32 +27,35 @@ class MeliController {
         // Obtenemos los detalles del producto pausado
         $tituloInserted = $this->meliModel->pausarProducto($id_syscom);
 
-        // Renderizamos la vista con Twig
-        echo $this->twig->render('pausaMl.html', ['resultado' => $tituloInserted]);
-
         // Enviar la notificación por correo con los detalles del producto pausado
         $this->enviarNotificacion($tituloInserted);
+
+        // Renderizamos la vista con Twig
+        echo $this->twig->render('pausaMl.html', ['resultado' => $tituloInserted]);
     }
 
-    // Función para enviar una notificación por correo con los detalles del producto pausado
-    private function enviarNotificacion($tituloInserted) {
-        ini_set('display_errors', 1);
-        ini_set('display_startup_errors', 1);
-        error_reporting(E_ALL);
+    public function enviarNotificacion($tituloInserted) {
 
-        // Configuración del correo
-        $mailid = time() + 1;
-        $vempresa = "Fragolan Linking People";
-        $vemail = "actualizaciones@fragolan.com";
-        $vemailhost = "mail.fragolan.com";
-        $vemailusuario = "actualizaciones@fragolan.com";
-        $vemailpassword = "l3&WQR@Dh9#A";
+        //----------------Estas variables de Dominio las dejamos asi por el momento de favor:--------------
 
-        // Asunto y cuerpo del correo
-        $asunto = "Producto pausado en MercadoLibre (Mail ID: $mailid)";
+        $mailid=time()+1;
+        $vempresa="Fragolan Linking People";
+
+        //----------Este email esta redireccionado a fragolan.mail@gmail.com, fragolan.sistemas@gmail.com y fragolan.soporte@gmail.com:------------------
+
+        $vemail="actualizaciones@fragolan.com";
+        $vemailhost="mail.fragolan.com";
+        $vemailusuario="actualizaciones@fragolan.com";
+        $vemailpassword="l3&WQR@Dh9#A";
+
+
+        //----Variables del Mensaje:-------------------------------------------------------------------
+
+        $asunto="Email de Actualizaciones de ".$vempresa." (Mail ID: ".$mailid.")";
+
 
         // Construir el mensaje con los detalles del log (asegúrate de que las claves del array son correctas)
-        $mensajeCorreo = "
+        $mensaje = "
             <html>
             <body>
                 <h2>Detalles del Producto Pausado</h2>
@@ -55,17 +70,29 @@ class MeliController {
             </html>
         ";
 
-        // Configurar las cabeceras del correo
-        $headers = "From: $vemail\r\n";
-        $headers .= "Reply-To: $vemail\r\n";
-        $headers .= "MIME-Version: 1.0\r\n";
-        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        //-----NO TOCAR:--------------------------------------------------------------------------------
 
-        // Enviar correo usando mail() de PHP
-        if (mail($vemail, $asunto, $mensajeCorreo, $headers)) {
-            echo "<br><br>Correo enviado con éxito!";
-        } else {
-            echo "<br><br>Error al enviar el correo.";
+        $elhtml=$mensaje;
+        $mensaje=strip_tags($mensaje);
+        $from = $vemail;
+        $to = $vemail;
+        $replyto = $vemail;
+        $subject = $asunto;
+        $boundary = uniqid();
+        $content_type = 'text/html; boundary=' . $boundary;
+        $lafechamail=date(DATE_RFC2822);
+        $body = $elhtml;
+
+        $headers = array ('From' => $from, 'To' => $to, 'Subject' => $subject, 'Reply-To' => $replyto, 'MIME-Version' => '1.0', 'Content-Type' => $content_type, 'Date' => $lafechamail);
+        $smtp = Mail::factory('smtp', array ('host' => $vemailhost, 'auth' => true, 'username' => $vemailusuario, 'password' => $vemailpassword));
+        $mail = $smtp->send($to, $headers, $body);
+
+        if(PEAR::isError($mail)) {
+            echo "<br><br>Ocurrió un Error:<br><br>".$mail->getMessage()."<br>";
         }
+        else {
+            echo "<br><br>Mail enviado!";
+        }
+
     }
 }

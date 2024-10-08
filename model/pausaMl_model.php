@@ -131,7 +131,7 @@ class MeliModel {
     private function registrarLog($id_syscom, $id_pub_meli, $estado, $titulo, $fecha) {
         
         // Registrar el log de la operación
-        $motivo = "FALTA DE STOCK";
+        $motivo = "STOCK POR DEBAJO DE INV. MINIMO";
         $sql = "INSERT INTO plataforma_ventas_log_meli (fecha, status_meli, id_pub_meli, id_producto, titulo, motivo) VALUES (NOW(), ?, ?, ?, ?, ?)";
         
         if ($stmt = $this->conn->prepare($sql)) {
