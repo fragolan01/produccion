@@ -15,8 +15,8 @@ if ($conn->connect_error) {
 }
 
 
-
-class MeliModel {
+// alv 11-10-24
+class MeliModel_activa {
     private $conn;
     private $token;
 

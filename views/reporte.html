@@ -75,6 +75,8 @@
                 <td><center>{{ row.mxn_tot_venta}}</center></td>
                 <td><center>{{ row.utilidad_round}}</center></td>
 
+
+                
                 <td><center>
                     {% if row.estado_meli == 1 %}
                         <b><font color="green">ACTIVO</font></b>
@@ -83,8 +85,8 @@
                     {% else %}
                         S/N PUBLI. MELI
                     {% endif %}
-                    </center>
-                </td>
+                </center></td>
+                
 
                 <!-- <td><center><b><a href="pausaMl.php?id_syscom={{ row.id_syscom }}">&laquo; PAUSAR</a></b></center></td> -->
                 <td><center><b><a href="pausaMl.php?id_syscom={{ row.id_syscom }}">&laquo; PAUSAR</a></b></center></td>

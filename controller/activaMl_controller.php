@@ -3,20 +3,22 @@
 //Llamar al modedlo
 require_once('./model/activaMl_model.php');
 
-
-class MeliController {
+// alv 11-10-24
+class MeliController_activa {
     private $meliModel;
     private $twig;
 
     public function __construct($conn, $twig) {
-        $this->meliModel = new MeliModel($conn);
+        // $this->meliModel = new MeliModel($conn);
+        $this->meliModel_activa = new MeliModel_activa($conn);
         $this->twig = $twig;
     }
 
     public function activarProducto($id_syscom) {
 
         // Obtenemos los detalles del producto activado
-        $tituloInserted = $this->meliModel->activarProducto($id_syscom);
+        // $tituloInserted = $this->meliModel->activarProducto($id_syscom);
+        $tituloInserted = $this->meliModel_activa->activarProducto($id_syscom);
 
         // Mostrar el resultado en una vista usando Twig
         echo $this->twig->render('activaMl.html', ['resultado' => $tituloInserted]);

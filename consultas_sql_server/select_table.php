@@ -14,19 +14,19 @@ if ($conn->connect_error) {
 }
 
 // Consulta SQL para eliminar el registro
-$orden = 10008;
-$sql = "DELETE FROM plataforma_ventas_temp WHERE orden = $orden";
+// $orden = 10008;
+$sql = "UPDATE plataforma_ventas_meli SET estado=1";
 
 // Ejecutar la consulta de eliminación
 if ($conn->query($sql) === TRUE) {
     // Verificar si se eliminó alguna fila
     if ($conn->affected_rows > 0) {
-        echo "El registro con la orden $orden se eliminó correctamente.";
+        echo "Estado meli se actualizo correctamente.";
     } else {
-        echo "No se encontró ningún registro con la orden $orden para eliminar.";
+        echo "No se encontró ningún Estado Meli .";
     }
 } else {
-    echo "Error al eliminar el registro: " . $conn->error;
+    echo "Error al UPDATR el registro: " . $conn->error;
 }
 
 // Cerrar la conexión

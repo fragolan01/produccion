@@ -4,6 +4,10 @@ require_once 'db/conexion.php'; // Conexión a la base de datos
 require_once 'model/pausaMl_model.php';
 require_once 'controller/pausaMl_controller.php';
 
+// alv 10-11-24
+require_once 'model/activaMl_model.php';
+require_once 'controller/activaMl_controller.php';
+
 require_once 'lib/Twig/Autoloader.php';
 Twig_Autoloader::register();
 
@@ -12,37 +16,33 @@ $loader = new Twig_Loader_Filesystem('./views');
 $twig = new Twig_Environment($loader);
 
 
-// Crear el controlador (fuera del if)
+// alv 10-11-24
+// Crear el controladores pausa, activa (fuera del if)
 $controller = new MeliController($conn, $twig);
-
+$controller_activa = new MeliController_activa($conn, $twig);
 
 
 // Verificar si el parámetro id_syscom está presente
 if (isset($_GET['id_syscom'])) {
     $id_syscom = $_GET['id_syscom'];
 
+    // alv 10-11-24
     // Crear el controlador
-    $controller = new MeliController($conn, $twig);
+    // $controller = new MeliController($conn, $twig);
+    $controller_pausa = new MeliController_pausa($conn, $twig);
+    $controller_activa = new MeliController_activa($conn, $twig);
 
+
+    // alv 10-11-24
     // Llamar al método del controlador
-    $controller->pausarProducto($int_producto_id);
+    // $controller->pausarProducto($int_producto_id);
+    $controller_pausa->pausarProducto($int_producto_id);
+    $controller_activa->activarProducto($int_producto_id);
+
 } else {
     echo "Error: 'id_syscom' no está definido.";
 }
 
-
-
-// class PausaMlController {
-//     // Método para pausar un producto
-//     public function pausarProducto($producto_id) {
-//         // Lógica para pausar el producto
-//         echo "Pausando el producto con ID: $producto_id <br>";
-//         // Aquí deberías agregar la lógica real para pausar el producto en tu base de datos o sistema
-//     }
-// }
-
-// Crear una instancia del controlador
-// $pausaMl = new PausaMlController(); // Asegúrate de crear la instancia
 
 // Token de autenticación
 $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjM1NmU3OTkwNmJkYjJjYWNhYTJjMWM5MjZmZGNjM2M4ZmEzNzQ4ZGY0Y2VjZWUxOGQzMWFlY2Q3MWViODJmMjFmMWY3ZDBhMGJlZDk1NzkxIn0.eyJhdWQiOiJ5ZmQwS1g4U1REYUtPZEJ0cHB2UG4wSWVFeUdiVW1CVCIsImp0aSI6IjM1NmU3OTkwNmJkYjJjYWNhYTJjMWM5MjZmZGNjM2M4ZmEzNzQ4ZGY0Y2VjZWUxOGQzMWFlY2Q3MWViODJmMjFmMWY3ZDBhMGJlZDk1NzkxIiwiaWF0IjoxNzA2NTUxMzA3LCJuYmYiOjE3MDY1NTEzMDcsImV4cCI6MTczODA4NzMwNiwic3ViIjoiIiwic2NvcGVzIjpbXX0.jhALtrRj_tkgNVj6CZxuEAnWxG6qpUMeOrXZvRbLU7B5prHrc-zPmn4lLcaEDDgfWRTXHEyQrN1nRpO8EQLuBug1kUJm-mwCkPhFMb4U6c7u_S4O0WWB4bNrRv_CQpz1Vdvic1pIJB5PDurPrzG2KbHlzfogdeYWolCKFShqPH5eehoJ0MwJ5AlL83AqpFhqzeprjB0K9eGJMx3a5jc8fYZxQm7jgh1uNk4LfaapuMos23IWczeC_1uQ3Y1XW1yuYaHXY5f9N5RA_IfBULEQ-ya8UL7Bem1ntWRegx1oIQ2M1sGz5hsdyiepI313K61rGa9khk_wI9bmwBwHxca4X_sIMT_sdJ9yOVzgXMRFfG-QlvhNWK-4xDldbo52uYwxu094cwTFZijk9NmNQq-WfPNyHEzmBrL7lSmuPVSqokggA0LjvHPnXmYCz30NxonC-zSgVp_SEBcF7rw0qo5oKe7VDj0GmPHeNV9T1n8IfFo7LaALHfyw4KAwivecMh9XY5GC_IYBLWrjAwqystUW2uiVS660t7mDqvfKonFjgjZyVuakVU4MDBXOJEzF9FVahBUc_MqXVvWbiYWDtVCnzj6rwiaXzLplEFnH4ntsCveizJmcQCF-hPRKHKprEJQFfN7E1TK3kWM0Mfei_URjiklr1J0lR6NmsSvF-q165mE";
@@ -69,6 +69,7 @@ $frecuencia_serie = 120;
 // Descuento
 $descuento = 0.04;
 
+
 // URL tipo de cambio
 $tipo_de_cambio = "https://developers.syscom.mx/api/v1/tipocambio";
 
@@ -82,6 +83,7 @@ $options = array(
 
 // Crear contexto de flujo
 $context = stream_context_create($options);
+
 // Realizar la consulta a la API con el token de autenticación
 $response = file_get_contents($tipo_de_cambio, false, $context);
 
@@ -110,6 +112,7 @@ if ($response === FALSE) {
     }
 }
 
+
 // Verificar si el archivo se abrió correctamente
 if ($manejador) {
     // Leer el archivo línea por línea
@@ -134,6 +137,8 @@ if ($manejador) {
                         $controller->pausarProducto($int_producto_id);  // Aquí se utiliza correctamente la instancia
                     } else {
                         echo 'ACTIVO'.'<br>';
+                        $controller_activa->activarProducto($int_producto_id);
+
                     }
                 }
             }
