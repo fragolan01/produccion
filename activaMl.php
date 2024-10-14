@@ -34,7 +34,7 @@ if (isset($_GET['id_syscom'])) {
     $id_syscom = $_GET['id_syscom'];
 
     // Crear el controlador
-    $controller = new MeliController($conn, $twig);
+    $controller = new MeliController_activa($conn, $twig);
 
     // Llamar al método del controlador
     $controller->activarProducto($id_syscom);

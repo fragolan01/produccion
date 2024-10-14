@@ -127,20 +127,57 @@ if ($manejador) {
             $response = file_get_contents($api_url, false, stream_context_create($options));
             if ($response !== FALSE) {
                 $data = json_decode($response, true);
+
+                
+            
+                // Valida estado meli en bd
                 if ($data !== null) {
+                    // Conversión de valores del arreglo $data
                     $int_producto_id = intval($data['producto_id']);
                     $int_stock = intval($data['total_existencia']);
-                    $int_inv_minimo = intval($ìnv_minimo);
-
-                    if ($int_stock <= $int_inv_minimo) {
-                        echo 'PAUSA'.'<br>';
-                        $controller->pausarProducto($int_producto_id);  // Aquí se utiliza correctamente la instancia
+                    $int_inv_minimo = intval($inv_minimo); // Corregido $ìnv_minimo por $inv_minimo
+                
+                    // Consulta a la base de datos para obtener el estado de Meli
+                    $sql_meli = "SELECT id_producto, estado FROM plataforma_ventas_meli WHERE id_producto = ?";
+                    $stmt = $conn->prepare($sql_meli);
+                    $stmt->bind_param('i', $int_producto_id);
+                    $stmt->execute();
+                    $result_estadoMeli = $stmt->get_result();
+                
+                    // Verificar si la consulta obtuvo resultados
+                    if ($result_estadoMeli && $result_estadoMeli->num_rows > 0) {
+                        $estado_meli = $result_estadoMeli->fetch_assoc();
+                        $int_status_meli = intval($estado_meli['estado']);
                     } else {
-                        echo 'ACTIVO'.'<br>';
-                        $controller_activa->activarProducto($int_producto_id);
-
+                        echo "No se encontraron productos con el ID especificado.";
+                        return 1; // Establecer un valor por defecto en caso de error
                     }
+                
+                    // Verificar si el stock es menor o igual al inventario mínimo
+                    if ($int_stock <= $int_inv_minimo) {
+                        // Verifica si el estado es 0 (ya pausado), en cuyo caso no hace nada
+                        if ($int_status_meli == 0) {
+                            echo "sin cambios"; // El estado ya es pausado, no se hace nada
+                        } 
+                        // Si el estado no es 0 y no es 2, procede a pausar el producto
+                        else if ($int_status_meli != 2) {
+                            echo 'PAUSA'.'<br>';
+                            $controller->pausarProducto($int_producto_id); // Aquí se pausa el producto
+                        } else {
+                            echo "sin cambios"; // Si ya está en estado 2, no se hace nada
+                        }
+                    } else {
+                        // Verifica si el estado no es 1 (activo) o 2, y si necesita cambiarse a "ACTIVO"
+                        if ($int_status_meli != 1 && $int_status_meli != 2) {
+                            echo 'ACTIVO'.'<br>';
+                            $controller_activa->activarProducto($int_producto_id); // Aquí se activa el producto
+                        } else {
+                            echo "sin cambios"; // El estado ya es activo o en estado 2, no se hace nada
+                        }
+                    }
+                                        
                 }
+
             }
         }
     }
