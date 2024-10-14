@@ -121,7 +121,7 @@ if ($manejador) {
         if (count($partes) == 4) {
             $orden = substr($partes[0], 0, 5);
             $producto_id = trim($partes[1]);
-            $ìnv_minimo = trim($partes[2]);
+            $inv_minimo = trim($partes[2]);
             $tot_venta_mxn = trim($partes[3]);
             $api_url = "https://developers.syscom.mx/api/v1/productos/" . $producto_id;
             $response = file_get_contents($api_url, false, stream_context_create($options));
@@ -135,7 +135,7 @@ if ($manejador) {
                     // Conversión de valores del arreglo $data
                     $int_producto_id = intval($data['producto_id']);
                     $int_stock = intval($data['total_existencia']);
-                    $int_inv_minimo = intval($inv_minimo); // Corregido $ìnv_minimo por $inv_minimo
+                    $int_inv_minimo = intval($inv_minimo); //
                 
                     // Consulta a la base de datos para obtener el estado de Meli
                     $sql_meli = "SELECT id_producto, estado FROM plataforma_ventas_meli WHERE id_producto = ?";
@@ -168,7 +168,11 @@ if ($manejador) {
                         }
                     } else {
                         // Verifica si el estado no es 1 (activo) o 2, y si necesita cambiarse a "ACTIVO"
-                        if ($int_status_meli != 1 && $int_status_meli != 2) {
+                        if ($int_status_meli == 1) {
+                            echo "sin cambios";
+                        }
+                        // Si el estado no es 1 no 2, procede a activar el porducto
+                        else if ($int_status_meli !=2){
                             echo 'ACTIVO'.'<br>';
                             $controller_activa->activarProducto($int_producto_id); // Aquí se activa el producto
                         } else {
