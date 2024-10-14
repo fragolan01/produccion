@@ -51,7 +51,9 @@ class MeliController {
 
         //----Variables del Mensaje:-------------------------------------------------------------------
 
-        $asunto="Email de Actualizaciones de ".$vempresa." (Mail ID: ".$mailid.")";
+        // Asunto y cuerpo del correo
+        $asunto = "Producto Pausado en MercadoLibre (Mail ID: $mailid)";
+        // $asunto="Email de Actualizaciones de ".$vempresa." (Mail ID: ".$mailid.")";
 
 
         // Construir el mensaje con los detalles del log (asegúrate de que las claves del array son correctas)
