@@ -23,6 +23,7 @@ class MeliController {
         $this->twig = $twig;
     }
 
+    
     public function pausarProducto($id_syscom) {
         // Obtenemos los detalles del producto pausado
         $tituloInserted = $this->meliModel->pausarProducto($id_syscom);
@@ -33,7 +34,7 @@ class MeliController {
         // Renderizamos la vista con Twig
         echo $this->twig->render('pausaMl.html', ['resultado' => $tituloInserted]);
     }
-
+    
     public function enviarNotificacion($tituloInserted) {
 
         //----------------Estas variables de Dominio las dejamos asi por el momento de favor:--------------

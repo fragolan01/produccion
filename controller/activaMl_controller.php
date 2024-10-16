@@ -14,6 +14,8 @@ class MeliController_activa {
         $this->twig = $twig;
     }
 
+
+    
     public function activarProducto($id_syscom) {
 
         // Obtenemos los detalles del producto activado
@@ -25,8 +27,8 @@ class MeliController_activa {
 
         // Enviar la notificación por correo con los detalles del producto activado
         $this->enviarNotificacion($tituloInserted);
-
     }
+    
 
     // Función para enviar una notificación por correo con los detalles del producto activado
     private function enviarNotificacion($tituloInserted) {

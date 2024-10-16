@@ -23,25 +23,25 @@ $controller_activa = new MeliController_activa($conn, $twig);
 
 
 // Verificar si el parámetro id_syscom está presente
-if (isset($_GET['id_syscom'])) {
-    $id_syscom = $_GET['id_syscom'];
+// if (isset($_GET['id_syscom'])) {
+//     $id_syscom = $_GET['id_syscom'];
 
-    // alv 10-11-24
-    // Crear el controlador
-    // $controller = new MeliController($conn, $twig);
-    $controller_pausa = new MeliController_pausa($conn, $twig);
-    $controller_activa = new MeliController_activa($conn, $twig);
+//     // alv 10-11-24
+//     // Crear el controlador
+//     // $controller = new MeliController($conn, $twig);
+//     $controller_pausa = new MeliController_pausa($conn, $twig);
+//     $controller_activa = new MeliController_activa($conn, $twig);
 
 
-    // alv 10-11-24
-    // Llamar al método del controlador
-    // $controller->pausarProducto($int_producto_id);
-    $controller_pausa->pausarProducto($int_producto_id);
-    $controller_activa->activarProducto($int_producto_id);
+//     // alv 10-11-24
+//     // Llamar al método del controlador
+//     // $controller->pausarProducto($int_producto_id);
+//     $controller_pausa->pausarProducto($int_producto_id);
+//     $controller_activa->activarProducto($int_producto_id);
 
-} else {
-    echo "Error: 'id_syscom' no está definido.";
-}
+// } else {
+//     echo "Error: 'id_syscom' no está definido.";
+// }
 
 
 // Token de autenticación
@@ -153,32 +153,31 @@ if ($manejador) {
                         return 1; // Establecer un valor por defecto en caso de error
                     }
                 
-                    // Verificar si el stock es menor o igual al inventario mínimo
                     if ($int_stock <= $int_inv_minimo) {
-                        // Verifica si el estado es 0 (ya pausado), en cuyo caso no hace nada
+                        echo "Stock es menor o igual al inventario mínimo<br>";
                         if ($int_status_meli == 0) {
-                            echo "sin cambios"; // El estado ya es pausado, no se hace nada
-                        } 
-                        // Si el estado no es 0 y no es 2, procede a pausar el producto
-                        else if ($int_status_meli != 2) {
-                            echo 'PAUSA'.'<br>';
-                            $controller->pausarProducto($int_producto_id); // Aquí se pausa el producto
+                            echo "sin cambios (estado ya pausado)<br>";
+                        } else if ($int_status_meli != 2) {
+                            echo "Producto será pausado<br>";
+                            $controller->pausarProducto($int_producto_id);
                         } else {
-                            echo "sin cambios"; // Si ya está en estado 2, no se hace nada
+                            echo "sin cambios (estado ya 2)<br>";
                         }
                     } else {
-                        // Verifica si el estado no es 1 (activo) o 2, y si necesita cambiarse a "ACTIVO"
-                        if ($int_status_meli == 1) {
-                            echo "sin cambios";
-                        }
-                        // Si el estado no es 1 no 2, procede a activar el porducto
-                        else if ($int_status_meli !=2){
-                            echo 'ACTIVO'.'<br>';
-                            $controller_activa->activarProducto($int_producto_id); // Aquí se activa el producto
+                        echo "Stock es mayor que el inventario mínimo<br>";
+                        if ($int_status_meli == 0) {
+                            echo "Producto será activado<br>";
+                            $controller_activa->activarProducto($int_producto_id);
+                        } else if ($int_status_meli == 1) {
+                            echo "sin cambios (producto ya activo)<br>";
+                        } else if ($int_status_meli != 2) {
+                            echo "Producto será activado<br>";
+                            $controller_activa->activarProducto($int_producto_id);
                         } else {
-                            echo "sin cambios"; // El estado ya es activo o en estado 2, no se hace nada
+                            echo "sin cambios (estado ya 2)<br>";
                         }
                     }
+                    
                                         
                 }
 
