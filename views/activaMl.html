@@ -6,7 +6,10 @@
     <title>Resultado de Activacion</title>
 </head>
 <body>
-    <h1>Resultado de la Operación</h1>
+    {% include 'apartado/navbar.html' %}
+
+
+    <h1>Detalle de activacion</h1>
     
     <p>Folio: {{ resultado.id }}</p>
     <p>{{ resultado.fecha }}</p>

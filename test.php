@@ -5,8 +5,7 @@ require_once 'db/conexion.php'; // Conexión a la base de datos
 // Consulta a la base de datos
 $sql_meli = "SELECT id_producto, estado FROM plataforma_ventas_meli WHERE id_producto IN (
 
-205630,
-218051
+205630
 
 )";
 $result_estadoMeli = $conn->query($sql_meli);

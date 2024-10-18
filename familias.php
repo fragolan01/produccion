@@ -1,38 +1,11 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Boton con CSS</title>
-    <style>
-        /* Estilo para los botones */
-        form {
-            display: inline-block;
-            margin-bottom: 10px;
-        }
-
-
-        input[type="submit"] {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
-
-
-
 <?php
 
+require_once './views/apartado/navbar.html';
+echo "<br>";
+echo "<br>";
+
+
+// Llama a renovar token
 $url = 'https://development.fragolan.com/token_ml/renuevatoken.php';
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -42,27 +15,8 @@ curl_close($ch);
 // You can then use the $response variable to process the output
 echo $response;
 
-
-
-
-echo '<form action="menu.php" method="post">';
-    echo '<input type="submit" name="consulta_btn" value="Inicio">';
-echo '</form>';
-echo '<br>';
-
-
-$servername = "localhost"; // Servidor de base de datos
-$username = "fragcom_develop"; // Usuario de MySQL
-$password = "S15t3ma5@Fr4g0l4N"; // Contraseña de MySQL
-$database = "fragcom_develop"; // base de datos
 // Conexión a la base de datos
-$conn = new mysqli($servername, $username, $password, $database);
-// Verifica la conexión
-if ($conn->connect_error) {
-    die("Error de conexión: " . $conn->connect_error);
-}
-
-
+require_once 'db/conexion.php';
 
 // Token de autenticación
 $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjM1NmU3OTkwNmJkYjJjYWNhYTJjMWM5MjZmZGNjM2M4ZmEzNzQ4ZGY0Y2VjZWUxOGQzMWFlY2Q3MWViODJmMjFmMWY3ZDBhMGJlZDk1NzkxIn0.eyJhdWQiOiJ5ZmQwS1g4U1REYUtPZEJ0cHB2UG4wSWVFeUdiVW1CVCIsImp0aSI6IjM1NmU3OTkwNmJkYjJjYWNhYTJjMWM5MjZmZGNjM2M4ZmEzNzQ4ZGY0Y2VjZWUxOGQzMWFlY2Q3MWViODJmMjFmMWY3ZDBhMGJlZDk1NzkxIiwiaWF0IjoxNzA2NTUxMzA3LCJuYmYiOjE3MDY1NTEzMDcsImV4cCI6MTczODA4NzMwNiwic3ViIjoiIiwic2NvcGVzIjpbXX0.jhALtrRj_tkgNVj6CZxuEAnWxG6qpUMeOrXZvRbLU7B5prHrc-zPmn4lLcaEDDgfWRTXHEyQrN1nRpO8EQLuBug1kUJm-mwCkPhFMb4U6c7u_S4O0WWB4bNrRv_CQpz1Vdvic1pIJB5PDurPrzG2KbHlzfogdeYWolCKFShqPH5eehoJ0MwJ5AlL83AqpFhqzeprjB0K9eGJMx3a5jc8fYZxQm7jgh1uNk4LfaapuMos23IWczeC_1uQ3Y1XW1yuYaHXY5f9N5RA_IfBULEQ-ya8UL7Bem1ntWRegx1oIQ2M1sGz5hsdyiepI313K61rGa9khk_wI9bmwBwHxca4X_sIMT_sdJ9yOVzgXMRFfG-QlvhNWK-4xDldbo52uYwxu094cwTFZijk9NmNQq-WfPNyHEzmBrL7lSmuPVSqokggA0LjvHPnXmYCz30NxonC-zSgVp_SEBcF7rw0qo5oKe7VDj0GmPHeNV9T1n8IfFo7LaALHfyw4KAwivecMh9XY5GC_IYBLWrjAwqystUW2uiVS660t7mDqvfKonFjgjZyVuakVU4MDBXOJEzF9FVahBUc_MqXVvWbiYWDtVCnzj6rwiaXzLplEFnH4ntsCveizJmcQCF-hPRKHKprEJQFfN7E1TK3kWM0Mfei_URjiklr1J0lR6NmsSvF-q165mE";
@@ -108,7 +62,6 @@ $options = array(
 $context = stream_context_create($options);
 // Realizar la consulta a la API con el token de autenticación
 $response = file_get_contents($tipo_de_cambio, false, $context);
-
 
 // Verificar si la consulta fue exitosa
 if ($response === FALSE) {
@@ -233,11 +186,6 @@ if ($manejador) {
 
                     }
 
-                    //Estatus Meli
-                    echo 'ESTATUS meli '.$data['status_meli'].'<br>';
- 
-                    
-
                     // Convertir a texto Titulo
                     $data_text = $data['titulo'];
 
@@ -258,13 +206,6 @@ if ($manejador) {
                             echo "Error al insertar datos: " . $conn->error;
                         }
                     }
-
-                    // UPDATE ID_PUBLI MELI
-                    $sql_update = "UPDATE plataforma_ventas_temp pvt
-                    JOIN plataforma_ventas_meli pvm ON pvt.id_syscom = pvm.id_producto
-                    SET pvt.fk_meli_id = pvm.id
-                    WHERE pvt.fk_meli_id IS NULL";
-                    //$result_update = $this->DB->query($sql_update);
                      
                 }
             

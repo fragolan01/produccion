@@ -61,9 +61,9 @@
                 <td><center>{{ row.precio_hoy }}</center></td>
                 <td><center>
                     {% if row.precio_difference < 0 %}
-                        <b><font color="green">{{ row.precio_difference }}</font></b>
+                        <b><font color="red">{{ row.precio_difference }}</font></b>
                     {% elseif row.precio_difference > 0 %}
-                        <b><font color="red">+{{ row.precio_difference }}</font></b>
+                        <b><font color="green">+{{ row.precio_difference }}</font></b>
                     {% else %}
                         <b><font>S/C</font></b>
                     {% endif %}
