@@ -134,11 +134,14 @@ class MeliModel_activa {
         
         // Registrar el log de la operación
         $motivo = "STOCK ACTUALIZADO";
-        $sql = "INSERT INTO plataforma_ventas_log_meli (fecha, status_meli, id_pub_meli, id_producto, titulo, motivo) VALUES (NOW(), ?, ?, ?, ?, ?)";
+        $sql_insert = "INSERT INTO plataforma_ventas_log_meli (fecha, status_meli, id_pub_meli, id_producto, titulo, motivo) VALUES (NOW(), ?, ?, ?, ?, ?)";
         
-        if ($stmt = $this->conn->prepare($sql)) {
+        if ($stmt = $this->conn->prepare($sql_insert)) {
             $stmt->bind_param("sssss", $estado, $id_pub_meli, $id_syscom, $titulo, $motivo);
             $stmt->execute();
+            if ($stmt->errno) {
+                echo "Error en la ejecución: (" . $stmt->errno . ") " . $stmt->error;
+            }
             $stmt->close();
         } else {
             return "Error al registrar el log: " . $this->conn->error;
