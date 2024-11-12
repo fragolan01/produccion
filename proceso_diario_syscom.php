@@ -135,7 +135,7 @@ if ($manejador) {
                     // Conversión de valores del arreglo $data
                     $int_producto_id = intval($data['producto_id']);
                     $int_stock = intval($data['total_existencia']);
-                    $int_inv_minimo = intval($inv_minimo); //
+                    $int_inv_minimo = intval($inv_minimo); 
                 
                     // Consulta a la base de datos para obtener el estado de Meli
                     $sql_meli = "SELECT id_producto, estado FROM plataforma_ventas_meli WHERE id_producto = ?";
