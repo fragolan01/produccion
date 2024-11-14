@@ -1,12 +1,13 @@
 <?php
 
 require_once 'db/conexion.php'; // Conexión a la base de datos
-require_once 'model/pausaMl_model.php';
-require_once 'controller/pausaMl_controller.php';
+
+require_once './model/pausaMl_model.php';
+require_once './controller/pausaMl_controller.php';
 
 // alv 10-11-24
-require_once 'model/activaMl_model.php';
-require_once 'controller/activaMl_controller.php';
+include_once './model/activaMl_model.php';
+require_once './controller/activaMl_controller.php';    
 
 require_once 'lib/Twig/Autoloader.php';
 Twig_Autoloader::register();
@@ -17,31 +18,17 @@ $twig = new Twig_Environment($loader);
 
 
 // alv 10-11-24
-// Crear el controladores pausa, activa (fuera del if)
+// Crear el controladores pausa
 $controller = new MeliController($conn, $twig);
+
+// Crear el controladores activa
 $controller_activa = new MeliController_activa($conn, $twig);
 
+// Proceso para pausar en tablas
+$controller_pausa = new MeliModel($conn, $twig);
 
-// Verificar si el parámetro id_syscom está presente
-// if (isset($_GET['id_syscom'])) {
-//     $id_syscom = $_GET['id_syscom'];
-
-//     // alv 10-11-24
-//     // Crear el controlador
-//     // $controller = new MeliController($conn, $twig);
-//     $controller_pausa = new MeliController_pausa($conn, $twig);
-//     $controller_activa = new MeliController_activa($conn, $twig);
-
-
-//     // alv 10-11-24
-//     // Llamar al método del controlador
-//     // $controller->pausarProducto($int_producto_id);
-//     $controller_pausa->pausarProducto($int_producto_id);
-//     $controller_activa->activarProducto($int_producto_id);
-
-// } else {
-//     echo "Error: 'id_syscom' no está definido.";
-// }
+// Proceso para activar en tablas
+$controller_activa = new MeliModel_activa($conn, $twig);
 
 
 // Token de autenticación
@@ -70,9 +57,6 @@ $frecuencia_serie = 120;
 $descuento = 0.04;
 
 
-// URL tipo de cambio
-$tipo_de_cambio = "https://developers.syscom.mx/api/v1/tipocambio";
-
 // Configurar opciones para la solicitud HTTP
 $options = array(
     'http' => array(
@@ -83,34 +67,6 @@ $options = array(
 
 // Crear contexto de flujo
 $context = stream_context_create($options);
-
-// Realizar la consulta a la API con el token de autenticación
-$response = file_get_contents($tipo_de_cambio, false, $context);
-
-// Verificar si la consulta fue exitosa
-if ($response === FALSE) {
-    echo 'Error al consultar la API SYSCOM';
-} else {
-    $data = json_decode($response, true);
-    if ($data !== null) {
-        echo "TIPO DE CAMBIO: " . $data['normal'] . "<br><br>";
-        $float_tc = floatval($data['normal']);
-
-        // Insertar datos en la tabla plataforma_ventas_tipo_cambio
-        $sql = "INSERT INTO plataforma_ventas_tipo_cambio (id_dominio, fecha, normal) 
-                VALUES ('$id_dominio', NOW(), '$float_tc')";
-        
-        if ($conn->query($sql) === TRUE) {
-            $conn->commit();
-            echo "Tipo de cambio insertado correctamente.";
-        } else {
-            $conn->rollback();
-            echo "Error al insertar tipo de cambio: " . $conn->error;
-        }
-    } else {
-        die('Error al decodificar el JSON');
-    }
-}
 
 
 // Verificar si el archivo se abrió correctamente
@@ -128,8 +84,7 @@ if ($manejador) {
             if ($response !== FALSE) {
                 $data = json_decode($response, true);
 
-                
-            
+                            
                 // Valida estado meli en bd
                 if ($data !== null) {
                     // Conversión de valores del arreglo $data
@@ -150,7 +105,7 @@ if ($manejador) {
                         $int_status_meli = intval($estado_meli['estado']);
                     } else {
                         echo "No se encontraron productos con el ID especificado.";
-                        return 1; // Establecer un valor por defecto en caso de error
+                        continue; // Establecer un valor por defecto en caso de error
                     }
                 
                     if ($int_stock <= $int_inv_minimo) {
@@ -159,7 +114,12 @@ if ($manejador) {
                             echo "sin cambios (estado ya pausado)<br>";
                         } else if ($int_status_meli != 2) {
                             echo "Producto será pausado<br>";
-                            $controller->pausarProducto($int_producto_id);
+                            $controller->pausarProducto($int_producto_id); //paused
+                            // alv 13-11-24
+                            // $controller_pausa->actualizarEstado($int_producto_id);
+                            echo $int_producto_id. "<br>";
+                          
+                            
                         } else {
                             echo "sin cambios (estado ya 2)<br>";
                         }
@@ -167,12 +127,20 @@ if ($manejador) {
                         echo "Stock es mayor que el inventario mínimo<br>";
                         if ($int_status_meli == 0) {
                             echo "Producto será activado<br>";
-                            $controller_activa->activarProducto($int_producto_id);
+                            $controller_activa->activarProducto($int_producto_id); //actived
+                            // alv 13-11-24
+                            // $controller_activa->actualizarEstado($int_producto_id);
+                            echo $int_producto_id. "<br>";
+
                         } else if ($int_status_meli == 1) {
                             echo "sin cambios (producto ya activo)<br>";
                         } else if ($int_status_meli != 2) {
                             echo "Producto será activado<br>";
-                            $controller_activa->activarProducto($int_producto_id);
+                            $controller_activa->activarProducto($int_producto_id); //actided
+                            // alv 13-11-24
+                            // $controller_activa->actualizarEstado($int_producto_id);
+                            echo $int_producto_id. "<br>";
+
                         } else {
                             echo "sin cambios (estado ya 2)<br>";
                         }
