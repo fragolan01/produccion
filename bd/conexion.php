@@ -4,7 +4,7 @@ $root = realpath($_SERVER["DOCUMENT_ROOT"]);
 $laraiz=$root."/";
 $vempresa="Fragolan Linking People DEVELOPMENT Engine";
 
-require($laraiz."conexion_url.php");
+// require($laraiz."conexion_url.php");
 
 $vurlh="https://".$vurl;
 $vurlh_developmentfragolan="https://".$vurl;
