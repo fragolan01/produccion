@@ -1,0 +1,38 @@
+genera una funcion para mostrar la informacion de esta consulta: 
+
+SELECT  sm.orden AS ORDEN, sm.id_prod_syscom AS 'ID SYSCOM', sm.id_item_meli AS 'PUBLI MELI'
+FROM plataforma_productos_syscom_meli sm
+
+la conexion a la bd:
+
+require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/db/conexion.php'; // Conexión a la base de datos
+esta es su configuracion:
+
+<?php
+
+$servername = "localhost"; // Servidor de base de datos
+$username = "root"; // Usuario de MySQL
+$password = ""; // Contraseña de MySQL
+$database = "ventas_testin"; // base de datos
+
+// $database = "fragcom_develop"; // base de datos
+
+// Conexión a la base de datos
+$conn = new mysqli($servername, $username, $password, $database);
+
+// Verifica la conexión
+if ($conn->connect_error) {
+    die("Error de conexión: " . $conn->connect_error);
+}else{
+    // echo "La conexion es correcta";
+}
+
+?>
+
+
+practica y eficiente con codigo legible, para poder incrementar la programacion gradualmente sin complicaciones
+
+=====================================================================================================================================
+
+
+

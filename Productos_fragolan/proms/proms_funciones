@@ -1,0 +1,529 @@
+UPDATE TABLA PRECIOS SYSCOM
+
+en esta tabla Mysql: 
+
+    $sql = "INSERT INTO `plataforma_productos_precios_syscom`
+            (`id_producto_syscom`, `precio1`, `precio_especial`, `precio_descuento`, `precio_lista`) 
+            VALUES (?, ?, ?, ?, ?)";
+
+Se tiene que actualizar diariamnete los campos: precio1, precio_especial, precio_descuento, precio_lista
+
+Indicame, cual seria la mejor opcion. La mejor practica para realizar esta actulizacion, a nivel base de datos o backen
+A lo largo del programa se realizaran actualizaciones en tablas del mismo tipo
+
+
+$sql = "INSERT INTO `plataforma_productos_precios_syscom`
+        (`id_producto_syscom`, `precio1`, `precio_especial`, `precio_descuento`, `precio_lista`) 
+        VALUES (?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+        `precio1` = VALUES(`precio1`),
+        `precio_especial` = VALUES(`precio_especial`),
+        `precio_descuento` = VALUES(`precio_descuento`),
+        `precio_lista` = VALUES(`precio_lista`)";
+$stmt = $conn->prepare($sql);
+$stmt->execute([$id_producto_syscom, $precio1, $precio_especial, $precio_descuento, $precio_lista]);
+
+===========================================================================================================================================================
+
+De este codigo:
+
+<?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Cargar las dependencias necesarias
+require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/db/conexion.php'; // Conexión a la base de datos
+require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/files/token/token_meli.php'; // Clase MeliToken
+
+/**
+ * Función para obtener los item_id desde la tabla `plataforma_productos_atributos`
+ * 
+ * @param mysqli $conn Conexión activa a la base de datos
+ * @return array Lista de item_id
+ */
+function obtenerDaros($conn) {
+    $valores = [];
+    $sql = "SELECT item_id, category_id, listing_type_id, price FROM plataforma_productos_atributos";
+    $result = $conn->query($sql);
+
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            // Almacenar cada fila en el array $valores
+            $valores[] = [
+                'item_id' => $row['item_id'],
+                'category_id' => $row['category_id'],
+                'listing_type_id' => $row['listing_type_id'],
+                'price' => $row['price']
+            ];
+        }
+    }
+    
+    // Imprimir los valores para depuración
+    print_r($valores);
+    return $valores;
+}
+
+// Llamar la función 
+$datos = obtenerDaros($conn); // Pasar solo la conexión a la función
+
+// Cerrar la conexión a la base de datos
+$conn->close();
+
+
+
+/**
+ * Función para hacer una llamada GET a la API de Mercado Libre para un item_id dado
+ * 
+ * @param string $itemId ID del producto
+ * @param string $token Token de autorización
+ * @return array|null Respuesta decodificada de la API o null si falla
+ */
+function consultarComisiones($valores, $token) {
+
+    foreach ($valores as $valor) {
+        $category_id = $valor['category_id'];
+        $listing_type_id = $valor['listing_type_id'];
+        $price = $valor['price'];
+    }
+
+    $url = "https://api.mercadolibre.com/sites/MLM/listing_prices?price=$price&listing_type_id=$listing_type_id&category_id=$category_id";
+    $headers = [
+        "Authorization: Bearer $token",
+        "api-version: 2" 
+    ];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        echo "Error al realizar la solicitud: " . curl_error($ch) . "\n";
+        return null;
+    }
+
+    curl_close($ch);
+    print_r($response);
+    return json_decode($response, true);
+}
+
+
+consultarComisiones($valores, $token);
+
+La Consulta GET obtener de $response, el dato: percentage_fee, asocioado a item_id de la funcion: obtenerDaros.
+Obtener el percentage_fee que corresponde al item_id de la funcion : obtenerDaros. La impresion seria:
+item_id percentage_fee
+
+Con el resultado de la funcion: consultarComisiones, crea una funcincion que genere una tabla virtual: virtual_comision Mysql 
+con los datos item_id y percentage_fee
+Que la tabla se imprima en el navegador
+
+
+=========================================================================================================================================================================================
+
+ACOS
+1. Funcion para crear, tabla virtual de ACOS por publicacion.
+   (La Funcion se crea en la ruta: calculos/temporalAcos.php)
+
+Genera una clase en php para crear una tabla temporal con los resultados de esta consulta: 
+
+SELECT 
+    am.item_id AS ITEM, rc.campaign_id AS CAMPAIN, rc.acos_target AS ACOS
+FROM
+    plataforma_productos_anuncio_meli am
+JOIN
+    plataforma_productos_result_campania rc ON
+    rc.campaign_id = am.campaign_id
+    
+
+
+
+ACOS - 2
+
+de ESTE CODIGO:
+
+<?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Cargar las dependencias necesarias
+require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/db/conexion.php'; // Conexión a la base de datos
+require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/files/token/token_meli.php'; // Clase MeliToken
+
+// Incluir el archivo de la clase
+require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/calculos/temporalAcos.php';
+
+// Uso de la clase
+$tempTableCreator = new TempTableCreator($conn); // $conn es la conexión de mysqli
+$tempTableCreator->createTempTable();
+$data = $tempTableCreator->fetchTempTableData();
+
+
+
+// Crear tabla temporal para almacenar comisiones
+function crearTablaTemporal($conn, $valores) {
+    $sql_create_table = "
+        CREATE TEMPORARY TABLE IF NOT EXISTS temp_comisiones (
+            item_id VARCHAR(50) NOT NULL,
+            percentage_fee DECIMAL(10, 2) DEFAULT NULL,
+            PRIMARY KEY (item_id)
+        )
+    ";
+    $conn->query($sql_create_table);
+
+    $sql_insert = "INSERT INTO temp_comisiones (item_id, percentage_fee) VALUES (?, ?) ON DUPLICATE KEY UPDATE percentage_fee = VALUES(percentage_fee)";
+    $stmt = $conn->prepare($sql_insert);
+
+    foreach ($valores as $valor) {
+        $stmt->bind_param("sd", $valor['item_id'], $valor['percentage_fee']);
+        $stmt->execute();
+    }
+    $stmt->close();
+}
+
+// Consultar comisiones y llenar la tabla temporal
+function consultarComisionesYGuardar($valores, $token, $conn) {
+    foreach ($valores as &$valor) {
+        $category_id = $valor['category_id'];
+        $listing_type_id = $valor['listing_type_id'];
+        $price = $valor['price'];
+        $item_id = $valor['item_id'];
+
+        $url = "https://api.mercadolibre.com/sites/MLM/listing_prices?price=$price&listing_type_id=$listing_type_id&category_id=$category_id";
+        $headers = [
+            "Authorization: Bearer $token",
+            "api-version: 2"
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $response = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            echo "Error al realizar la solicitud: " . curl_error($ch) . "\n";
+            continue;
+        }
+
+        curl_close($ch);
+        $decodedResponse = json_decode($response, true);
+
+        $valor['percentage_fee'] = $decodedResponse['sale_fee_details']['percentage_fee'] ?? null;
+    }
+
+    crearTablaTemporal($conn, $valores);
+}
+
+// Obtener datos de la base de datos
+function obtenerDatos($conn) {
+    $valores = [];
+    $sql = "SELECT item_id, category_id, listing_type_id, price FROM plataforma_productos_atributos";
+    $result = $conn->query($sql);
+
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $valores[] = [
+                'item_id' => $row['item_id'],
+                'category_id' => $row['category_id'],
+                'listing_type_id' => $row['listing_type_id'],
+                'price' => $row['price']
+            ];
+        }
+    }
+    return $valores;
+}
+
+// Ejecutar las funciones
+$valores = obtenerDatos($conn);
+consultarComisionesYGuardar($valores, $token, $conn);
+
+// Realizar la consulta final
+$sql_utilidad = "
+    SELECT 
+        sys.id_producto_syscom AS 'ID SYSCOM', 
+        MAX(ps.fecha) AS 'FECHA',
+        ps.precio_descuento AS 'PRECIO',
+        (ps.precio_descuento * ppv.iva) AS 'IVA',
+        (ps.precio_descuento + (ps.precio_descuento * ppv.iva)) AS 'USD TOTAL',
+        (ps.precio_descuento + (ps.precio_descuento * ppv.iva)) * tc.normal AS 'USD COSTO',
+        a.price AS 'MXN PRECIO ML',
+        (temp.percentage_fee/100) * a.price AS 'COMISIÓN'
+    FROM 
+        plataforma_productos_syscom_meli sm
+    JOIN
+        plataforma_productos_atributos a
+        ON sm.item_id = a.item_id
+    JOIN 
+        plataforma_productos_syscom sys
+        ON sm.producto_id = sys.id_producto_syscom
+    JOIN 
+        plataforma_productos_precios_syscom ps 
+        ON ps.id_producto_syscom = sys.id_producto_syscom
+    CROSS JOIN 
+        (SELECT iva FROM plataforma_productos_variables LIMIT 1) ppv
+    CROSS JOIN 
+        (SELECT normal FROM plataforma_productos_tipo_cambio LIMIT 1) tc
+    LEFT JOIN 
+        temp_comisiones temp
+        ON a.item_id = temp.item_id
+    GROUP BY 
+        sm.producto_id, sm.item_id, a.price, sys.id_producto_syscom, ps.precio_descuento, temp.percentage_fee
+";
+
+$result = $conn->query($sql_utilidad);
+
+// Imprimir los resultados
+if ($result && $result->num_rows > 0) {
+    echo "<table border='1'>";
+    echo "<tr><th>ID SYSCOM</th><th>FECHA</th><th>PRECIO</th><th>IVA</th><th>USD TOTAL</th><th>USD COSTO</th><th>MXN PRECIO ML</th><th>COMISIÓN</th></tr>";
+    while ($row = $result->fetch_assoc()) {
+        echo "<tr>";
+        echo "<td>{$row['ID SYSCOM']}</td>";
+        echo "<td>{$row['FECHA']}</td>";
+        echo "<td>{$row['PRECIO']}</td>";
+        echo "<td>{$row['IVA']}</td>";
+        echo "<td>{$row['USD TOTAL']}</td>";
+        echo "<td>{$row['USD COSTO']}</td>";
+        echo "<td>{$row['MXN PRECIO ML']}</td>";
+        echo "<td>{$row['COMISIÓN']}</td>";
+        echo "</tr>";
+    }
+    echo "</table>";
+} else {
+    echo "No se encontraron resultados.";
+}
+
+// Cerrar la conexión
+$conn->close();
+?>
+
+Llama a las clase: TempTableCreator del archivo: temporalAcos.php
+con la tabla temporal: temp_results une la consulta: createTempTableSQL
+a la consulta: $sql_utilida
+
+Se unenc con:
+am.item_id AS ITEM = sm.item_id
+
+El resultado unelo a la consulta: $sql_utilidad despues de:   echo "<td>{$row['COMISIÓN']}</td>";
+
+
+=================================================================================================
+
+FIJO ML
+
+DE ESTA COSNSULTA:
+
+$sql_utilidad = "
+    SELECT 
+        sys.id_producto_syscom AS 'ID SYSCOM', 
+        MAX(ps.fecha) AS 'FECHA',
+        ps.precio_descuento AS 'PRECIO',
+        (ps.precio_descuento * ppv.iva) AS 'IVA',
+        (ps.precio_descuento + (ps.precio_descuento * ppv.iva)) AS 'USD TOTAL',
+        (ps.precio_descuento + (ps.precio_descuento * ppv.iva)) * tc.normal AS 'USD COSTO',
+        a.price AS 'MXN PRECIO ML',
+        (temp.percentage_fee / 100) * a.price AS 'COMISIÓN',
+        temp_results.ITEM AS 'ITEM', -- Agregar ITEM de la tabla temporal,
+
+        ((temp_results.ACOS/100) * a.price)/2 AS 'ACOS' -- Agregar ACOS de la tabla temporal
+    FROM 
+        plataforma_productos_syscom_meli sm
+    JOIN
+        plataforma_productos_atributos a ON sm.item_id = a.item_id
+    JOIN 
+        plataforma_productos_syscom sys ON sm.producto_id = sys.id_producto_syscom
+    JOIN 
+        plataforma_productos_precios_syscom ps ON ps.id_producto_syscom = sys.id_producto_syscom
+    CROSS JOIN 
+        (SELECT iva FROM plataforma_productos_variables LIMIT 1) ppv
+        
+    CROSS JOIN 
+        (SELECT fijo_ml FROM plataforma_productos_variables LIMIT 1) fm
+
+    CROSS JOIN 
+        (SELECT normal FROM plataforma_productos_tipo_cambio LIMIT 1) tc
+    LEFT JOIN 
+        temp_comisiones temp ON a.item_id = temp.item_id
+    LEFT JOIN 
+        temp_results ON sm.item_id = temp_results.ITEM -- Unir con la tabla temporal
+    
+    GROUP BY 
+        sm.producto_id, sm.item_id, a.price, sys.id_producto_syscom, ps.precio_descuento, temp.percentage_fee, temp_results.ITEM, temp_results.ACOS
+";
+
+Modifica la operacion en :         
+    ((temp_results.ACOS/100) * a.price)/2 AS 'ACOS' -- Agregar ACOS de la tabla temporal
+IF a.price < 298 
+    a.price_fijo= a.price + fm.fijo_ml
+    ((temp_results.ACOS/100) *a.price_fijo)/2 AS 'ACOS' -- Agregar ACOS de la tabla temporal
+else
+    ((temp_results.ACOS/100) * a.price)/2 AS 'ACOS' -- Agregar ACOS de la tabla temporal
+
+Si el precio es menor a 298 + fijo_ml y se realice la operacion:
+    ((temp_results.ACOS/100) *a.price_fijo)/2 AS 'ACOS' -- Agregar ACOS de la tabla temporal
+Si precio es Mayor a 298 No sume nada, solo la operacion: 
+    ((temp_results.ACOS/100) *a.price_fijo)/2 AS 'ACOS' -- Agregar ACOS de la tabla temporal
+
+genera la consulta completa con la mejor optimizacion y un noivel senior en bd mysql
+
+
+===============================================================================================
+"
+SELECT 
+sys.id_producto_syscom AS 'ID SYSCOM', 
+MAX(ps.fecha) AS 'FECHA',
+ps.precio_descuento AS 'PRECIO',
+(ps.precio_descuento * ppv.iva) AS 'IVA',
+(ps.precio_descuento + (ps.precio_descuento * ppv.iva)) AS 'USD TOTAL',
+(ps.precio_descuento + (ps.precio_descuento * ppv.iva)) * tc.normal AS 'USD COSTO',
+a.price AS 'MXN PRECIO ML',
+(temp.percentage_fee / 100) * a.price AS 'COMISIÓN',
+temp_results.ITEM AS 'ITEM', -- Agregar ITEM de la tabla temporal
+
+CASE 
+    WHEN a.price < fm.fijo_ml THEN 
+        ((temp_results.ACOS / 100) * (a.price + fm.fijo_ml)) / 2
+    ELSE 
+        ((temp_results.ACOS / 100) * a.price) / 2
+END AS 'ACOS', -- Calcular ACOS basado en la condición de precio
+
+CASE 
+    WHEN a.price < fm.fijo_ml THEN 
+        ((temp.percentage_fee / 100) * a.price) + (a.price + fm.fijo_ml) + ((temp_results.ACOS / 100) * (a.price + fm.fijo_ml)) / 2
+    ELSE 
+        ((temp.percentage_fee / 100) * a.price) + ((temp_results.ACOS / 100) * (a.price + fm.fijo_ml)) / 2
+END AS 'DESCUENTO TOT' -- Calcular DESCUENTO TOTAL basado en la condición de precio
+
+FROM 
+plataforma_productos_syscom_meli sm
+JOIN
+plataforma_productos_atributos a ON sm.id_item_meli = a.item_id
+JOIN 
+plataforma_productos_syscom sys ON sm.id_prod_syscom = sys.id_producto_syscom
+JOIN 
+plataforma_productos_precios_syscom ps ON ps.id_producto_syscom = sys.id_producto_syscom
+CROSS JOIN 
+(SELECT iva FROM plataforma_productos_variables LIMIT 1) ppv
+CROSS JOIN 
+(SELECT fijo_ml FROM plataforma_productos_variables LIMIT 1) fm
+CROSS JOIN 
+(SELECT normal FROM plataforma_productos_tipo_cambio LIMIT 1) tc
+LEFT JOIN 
+temp_comisiones temp ON a.item_id = temp.item_id
+LEFT JOIN 
+temp_results ON sm.id_item_meli = temp_results.ITEM -- Unir con la tabla temporal
+
+GROUP BY 
+sm.id_prod_syscom, sm.id_item_meli, a.price, sys.id_producto_syscom, ps.precio_descuento, temp.percentage_fee, temp_results.ITEM, temp_results.ACOS, fm.fijo_ml
+"
+
+=========================================================================================================================================
+
+Redondear los resultados de la consulta a dos decimales en: 
+
+( pc.precio_descuento - (pc.precio_descuento * 4/100)) AS 'PRECIO', -- Usamos el último precio_descuento
+(pc.precio_descuento * v.iva) AS 'IVA'
+
+El resusltado de 'IVA'=70.012800 toma 6 digitos, que tome  'IVA'=70.01 dos digitos.
+
+Como es posible realizar el redondeo en las operaciones
+
+
+
+======================================================================================================================================================================
+
+Syscom Meli
+Del script:
+
+
+<?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Cargar las dependencias necesarias
+require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/db/conexion.php'; // Conexión a la base de datos
+
+
+/**
+ * Función para leer un archivo línea por línea y devolver un array con los valores
+ * 
+ * @param string $rutaArchivo Ruta del archivo a leer
+ * @return array Lista de valores extraídos del archivo
+ */
+function leerArchivo($rutaArchivo) {
+    if (!file_exists($rutaArchivo)) {
+        die("El archivo $rutaArchivo no existe.\n");
+    }
+
+    $manejador = fopen($rutaArchivo, 'r');
+
+    while (($linea = fgets($manejador)) !== false) {
+        $partes = explode("\t", trim($linea)); // Eliminar espacios en los extremos
+
+        // Aceptar 4 o 5 partes
+        if (count($partes) >= 4) {
+            $orden = trim($partes[0]);
+            $producto_id = trim($partes[1]);
+            $inv_minimo = trim($partes[2]);
+            $publi_meli = trim($partes[3]);
+
+            // Si hay un quinto elemento, almacenarlo
+            $extra = isset($partes[4]) ? trim($partes[4]) : null;
+
+            // Aquí puedes hacer lo que necesites con los datos
+        } else {
+            // echo  htmlspecialchars($linea) . "\t";
+        }
+    }
+
+    fclose($manejador);
+    return $producto_id;
+}
+
+
+// Ruta para leer archivo
+$rutaArchivo = $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/files/all_product_publi_meli1.txt'; // Archivos a consultar
+
+
+// Leer lista de productos
+$allProduct = leerArchivo($rutaArchivo);
+
+
+$id_syscom = leerArchivo($rutaArchivo);
+
+
+crea otra funcion que tome cada producto_id, del return $producto_id; 
+resultado de la funcion leet_archivo lo consulte con la tabla:  plataforma_productos_syscom_meli. 
+Obtener los producto_id que no estes en la tabla.
+
+La conexion a la bd esta cargada
+// Cargar las dependencias necesarias
+require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/db/conexion.php'; // Conexión a la base de datos
+
+Este es su codigo:
+
+$servername = "localhost"; // Servidor de base de datos
+$username = "root"; // Usuario de MySQL
+$password = ""; // Contraseña de MySQL
+$database = "ventas_testin"; // base de datos
+
+// $database = "fragcom_develop"; // base de datos
+
+// Conexión a la base de datos
+$conn = new mysqli($servername, $username, $password, $database);
+
+// Verifica la conexión
+if ($conn->connect_error) {
+    die("Error de conexión: " . $conn->connect_error);
+}else{
+    // echo "La conexion es correcta";
+}
+
+?>

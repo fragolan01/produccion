@@ -1,0 +1,1158 @@
+
+1. Proms total de items
+recorre el archivo .json con este formato:
+    "scroll_id": "eyJpZCI6Ik1MTTIwNDA0NDAwMDUiLCJudW1lcmljX2lkIjoyMDQwNDQwMDA1LCJzdG9wX3RpbWUiOiIyMDQ0LTAzLTE5VDA0OjAwOjAwLjAwMFoifQ==",
+    "seller_id": "1204465713",
+    "results": [
+        "MLM2395046784",
+        "MLM2411715856",
+        "MLM2410848342",
+        "MLM2585843198",
+        "MLM1959030721",
+        "MLM1959403553",
+    ]
+Capturar el valor de llave: seller_id y todos los datos denrtro de: results[]. 
+Insertar en: $sql= "INSERT INTO `plataforma_productos_total_items`(`seller_id`, `item_id`) VALUES (?,?)";
+Codigo: PHP. Coneccion a BD: lista. Ruta archiv: Lista. genera: foreach recorre archivo
+
+======================================================================================================================================================================================
+
+COMPLETADO
+Genera un codgio php para crear un scrip que realice estos puntos:
+1. Consulta la tabal: plataforma_productos_total_items, obtener item_id (recorer toda la tabla).
+2. Hacer llamda get: https://api.mercadolibre.com/items/$item_id.
+    Token de autorizacion: APP_USR-5829758725953784-121215-2cf2c28b6a5b19e0d8c9eabcba5daf74-1204465713
+3. Del resultado de la consulta (formato json) insertar en la tabla: title, family_name, seller_id, category_id, price, corrency_id, listing_type_id, consition, permalink.
+    INSERT INTO `plataforma_productos_atributos`(`item_id`, `title`, `family_name`, `seller_id`, `category_id`, `price`, `currency_id`, `listing_type_id`, `condition`, `permalink`) 
+    VALUES ('[value-3]','[value-4]','[value-5]','[value-6]','[value-7]','[value-8]','[value-9]','[value-10]','[value-11]','[value-12]').
+4. codigo obtimo, reutilizable, implementar funciones, mejores poracticas,
+
+ Nota: coneccion a bd es la misma de la ultima funcion que modificaste
+
+ ========================================================================================================================================================================================
+
+ 
+ SYSCOM
+ Genera un codigo php para crear un acript que realice estos puntos:
+ 1. Consulta el archivo files/prod_dyscom.txt recorre el archivo, toma el numero es $id_syscom (RENGLON POR RENGLON)
+ 2. Genera un llamado get a la API https://developers.syscom.mx/api/v1/productos/$id_syscom
+ 3. Del Resultado del llamado a la API SYSCOM toma los valores: 
+    producto_id,
+    modelo,
+    total_existencia,
+    titulo,
+    marca,
+    img_portada,
+    link_privado,`
+    descripcion,
+    caracteristicas,
+    imagen,
+    peso,
+    alto,
+    largo,
+    ancho
+4. Con los datos obtenido del paso 3, insertar a la tabla: plataforma_productos_syscom, de la BD, INSERT:
+
+function insertarProductosSyscom($conn, $datos) {
+    $sql = "INSERT INTO `plataforma_productos_syscom`(`id_producto_syscom`, `modelo`, `total_existencia`, `titulo`, `marca`, `imagen`, `link_privado`, `descripcion`, `caracteristicas`, `peso`, `alto`, `largo`, `ancho`) 
+    VALUES 
+    (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    $stmt = $conn->prepare($sql);
+
+    if (!$stmt) {
+        echo "Error al preparar la consulta: " . $conn->error . "\n";
+        return false;
+    }
+
+    $stmt->bind_param(
+        "sssssssssdddd",
+        $datos['id_producto_syscom'],
+        $datos['modelo'],
+        $datos['total_existencia'],
+        $datos['titulo'],
+        $datos['marca'],
+        $datos['imagen'],
+        $datos['link_privado'],
+        $datos['descripcion'],
+        $datos['caracteristicas'],
+        $datos['peso'],
+        $datos['alto'],
+        $datos['largo'],
+        $datos['ancho']
+    );
+
+    $result = $stmt->execute();
+    $stmt->close();
+
+    return $result;
+}
+
+ Notas: 
+ - coneccion a bd es la misma de la ultima funcion que modificaste
+ - Los archivos id_syscom.txt y tokenSyscom.txt: // Cargar las dependencias necesarias. de la funcion anterior que generaste
+ - Si es prom no es claro indicame la correccion y la informacion necesaria
+
+ Correccion: 
+En:  $stmt->bind_param(
+        "ssssssss@dddd",
+        $datos['id_producto_syscom'],
+        $datos['modelo'],
+        $datos['total_existencia'],
+        $datos['titulo'],
+        $datos['marca'],
+        $datos['imagen'],
+        $datos['link_privado'],
+        $datos['descripcion'],
+        $datos['caracteristicas'],
+        $datos['peso'],
+        $datos['alto'],
+        $datos['largo'],
+        $datos['ancho']
+    );
+En campo: $datos['caracteristicas'] se inserto "array".
+en  "ssssssss@dddd", el @ corresponde caracteristics. 
+Corrige el @ por el tipo de dato TEXT e insertar la informacion 
+
+Warning: Array to string conversion in C:\xampp\htdocs\productos_fragolan\monitoring_And_LoadTest\tablas\syscom\syscom.php on line 87
+Datos insertados correctamente para el producto: 204626
+
+==============================================================================================================================================================
+
+ANUNCIO_MELI
+
+1. Consultar la tabla: plataforma_productos_total_items, obtener $item_id (ok)
+2. Traer la funcion que obtiene token meli (ok)
+3. realizar consulta GET a la API Mercado Libre: https://api.mercadolibre.com/advertising/product_ads/items/$item_id
+4. El resultado formato JSON obtener:
+    - item_id           	char(20)
+    - campaign_id           int(10)
+    - price                 decimal(10,2)
+    - title                 TEXT
+    - status                char(20)
+    - domain_id             char(20)
+    - date_created          timestamp
+    - channel               char(20)
+    - brand_value_id        int(10)
+    - brand_value_name      varchar(250)
+    - current_level     	char(20)
+    - permalink             TEXT
+
+4.1 El dato: "date_created": "2023-10-03T16:14:51Z". Realiza esta conversion de una sugerencia anterior que te consulte:
+
+Tipo de dato TIMESTAMP
+Usa TIMESTAMP si deseas manejar zonas horarias automáticamente. Sin embargo, tendrás que convertir el formato antes de almacenarlo porque MySQL no acepta directamente el sufijo 
+
+EJEMPLO INSERCION: 
+INSERT INTO date_created (fecha) VALUES ('2023-10-17 02:26:53');
+
+Para evitar errores en la insercion de la fecha.
+
+5. Insertar los datos en la tabla: plataforma_productos_anuncio_meli:
+
+    function plataforma_productos_anuncio_meli($conn, $datos) {
+    $sql = "INSERT INTO `plataforma_productos_anuncio_meli`(`item_id`, `campaign_id`, `price`, `title`, `status`, `domain_id`, `date_created`, `channel`, `brand_value_id`, `brand_value_name`, `current_level`, `permalink`) 
+            VALUES 
+            (?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    $stmt = $conn->prepare($sql);
+
+    if (!$stmt) {
+        echo "Error al preparar la consulta: " . $conn->error . "\n";
+        return false;
+    }
+
+    $stmt->bind_param(
+        "ssssssssssss",
+        $datos['item_id'],
+        $datos['campaign_id'],
+        $datos['price'],
+        $datos['title'],
+        $datos['status'],
+        $datos['domain_id'],
+        $datos['date_created'],
+        $datos['channel'],
+        $datos['brand_value_id'],
+        $datos['brand_value_name'],
+        $datos['current_level'],
+        $datos['permalink'],
+    );
+
+    $result = $stmt->execute();
+    $stmt->close();
+
+    return $result;
+}
+
+
+NOTA: 
+    - Los datos de la BD son la misma ruta de las anteriores funciones 
+    - Crea el codigo con las mejores practicas, funciones reutilizables, el menor codigo, nivel super experto
+    - la key de Meli es la misma ruta de la anterior funcion: 
+        require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/token/token_meli.php'; // Token de autenticación
+
+
+
+
+=========================================================================================================================================================================================
+
+METRICAS CAMPANIA
+
+<!-- Funciones y dependencias -->
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Cargar las dependencias necesarias
+require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/db/conexion.php'; // Conexión a la base de datos
+require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/files/token/token_meli.php'; // Clase MeliToken
+
+
+1. Consullta API Mercado Libre: 
+
+/**
+ * Función para hacer una llamada GET a la API de Mercado Libre para un item_id dado
+ * 
+ * @param string $itemId ID del producto
+ * @param string $token Token de autorización
+ * @return array|null Respuesta decodificada de la API o null si falla
+ */
+function consultarApiMeli($itemId, $token) {
+    $url = "https://api.mercadolibre.com/advertising/advertisers/47126/product_ads/campaigns";
+    $headers = [
+        "Authorization: Bearer $token",
+        "api-version: 2" 
+    ];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        echo "Error al realizar la solicitud: " . curl_error($ch) . "\n";
+        return null;
+    }
+
+    curl_close($ch);
+    return json_decode($response, true);
+}
+
+
+2. Del resultado formATO JSON obtener los valores de la llaves: 
+    "results": [
+        {
+            "id"
+            "name":
+            "status":
+            "last_updated":
+            "date_created":
+            "channel":
+            "budget": 4000.0,
+            "acos_target": 3.0,
+        },
+
+
+3. Insertar los valores obtenidos en la tabla: plataforma_productos_result_campania:
+
+* Función para insertar datos en la tabla plataforma_productos_result_campania
+ * 
+ * @param mysqli $conn Conexión activa a la base de datos
+ * @param array $datos Datos a insertar
+ * @return bool True si la inserción fue exitosa, False en caso contrario
+ */
+function plataforma_productos_result_campania($conn, $datos) {
+    $sql = "INSERT INTO `plataforma_productos_anuncio_meli`(`campaign_id `, `nombre_campania`, `status`, `last_updated`, `date_created`, `channel`, `acos_target`) 
+            VALUES 
+            (?,?,?,?,?,?,?)";
+
+    $stmt = $conn->prepare($sql);
+
+    if (!$stmt) {
+        echo "Error al preparar la consulta: " . $conn->error . "\n";
+        return false;
+    }
+
+
+    // Convertir fecha al formato TIMESTAMP
+    if (!empty($datos['last_updated'])) {
+        $datos['last_updated'] = str_replace("T", "", $datos['last_updated']);
+        $datos['last_updated'] = str_replace("Z", "", $datos['last_updated']);
+    }
+
+    if (!empty($datos['date_created'])) {
+        $datos['date_created'] = str_replace("T", "", $datos['date_created']);
+        $datos['date_created'] = str_replace("Z", "", $datos['date_created']);
+    }
+
+    
+
+    $stmt->bind_param(
+        "ssssssssssss",
+        $datos['campaign_id'],
+        $datos['nombre_campania'],
+        $datos['status'],
+        $datos['last_updated'],
+        $datos['date_created'],
+        $datos['channel'],
+        $datos['acos_target']
+    );
+
+    $result = $stmt->execute();
+    $stmt->close();
+
+    return $result;
+}
+
+
+Notas:
+- Genera un codigo 100% funcional, reutilizable y con las mejores paracticas
+- Crea funciones reutilizables.
+- Se un desarrollador experto PHP que implementa las mejores practicas a este codigo
+
+
+
+====================================================================================================================================================================================================
+
+Genera un codgio php para crear un scrip que realice estos puntos::
+
+    1. Consulta la tabla: plataforma_productos_arbol_de_categorias recorre cada registro de: $id_categoria:
+
+        /**
+        * Función para obtener los id_categoria desde la tabla `plataforma_productos_arbol_de_categorias`
+        * 
+        * @param mysqli $conn Conexión activa a la base de datos
+        * @return array Lista de id_categoris
+        */
+        function obtenerIdCategoria($conn) {
+            $idCategoria = [];
+            $sql = "SELECT id_categoria FROM plataforma_productos_arbol_de_categorias";
+            $result = $conn->query($sql);
+
+            if ($result && $result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    $idCategoria[] = $row['id_categoria'];
+                }
+            }
+
+            return $idCategoria;
+        }
+
+
+    2. Consulta GET de api Mercado Libre: 
+        https://api.mercadolibre.com/categories/$id_categoria
+        
+        2.1 Del resultado de la consulta (ejemplo de resultado):
+
+                "id": "MLM189530",
+            "name": "Agro",
+            "picture": "https://http2.mlstatic.com/storage/categories-api/images/5f192852-3896-474c-8c31-1c40080fa639.png",
+            "permalink": "https://www.mercadolibre.com.mx/c/agro",
+            "total_items_in_this_category": 197746,
+            "path_from_root": [
+                {
+                    "id": "MLM189530",
+                    "name": "Agro"
+                }
+            ],
+            "children_categories": [
+                {
+                    "id": "MLM446791",
+                    "name": "Agricultura de Precisión",
+                    "total_items_in_this_category": 1038
+                },
+                {
+                    "id": "MLM456820",
+                    "name": "Almacenaje",
+                    "total_items_in_this_category": 808
+                },
+                {
+                    "id": "MLM442346",
+                    "name": "Animales",
+                    "total_items_in_this_category": 474
+                },
+                {
+                    "id": "MLM456826",
+                    "name": "Apicultura",
+                    "total_items_in_this_category": 33087
+                },
+                {
+                    "id": "MLM456833",
+                    "name": "Energia Renovable",
+                    "total_items_in_this_category": 5151
+                }
+        2.2 Obtener lo que esta dentro del arreglo:  "children_categories", obtener el valor de las llaves:
+            - id
+            - name
+            - total_items_in_this_category
+    
+    3. Los valores obtenidos insertar en la tabla: plataforma_productos_children_categories
+            - $id = $id_categoria
+            - $id = $id_children_category
+            - $name = $name_children
+    
+        Capturar todos los id y name que pertenezcan al: $id_categoria consultada   
+
+
+Nota:
+ - Crea funciones para ser reurtilizables en el proyecto.
+ - Codigo minimalista y funcional, obtimizacion a memoria
+ - Mejores practicas en php
+
+
+ ===================================================================================================================
+
+ PRECIOS SYSCOM
+
+ Escribe un script PHP con deteccion de errores:
+
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+
+Con estas dependecias: 
+        // Cargar las dependencias necesarias
+        require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/db/conexion.php'; // Conexión a la base de datos
+
+Con la funcion que consulta la tabla: plataforma_productos_syscom:
+ 
+/**
+ * Función para obtener los id_producto_syscom desde la tabla `plataforma_productos_syscom`
+ * 
+ * @param mysqli $conn Conexión activa a la base de datos
+ * @return array Lista de id_producto_syscom
+ */
+function obtenerIdProductoSyscom($conn) {
+    $id_producto_syscom = [];
+    $sql = "SELECT id_producto_syscom FROM plataforma_productos_syscom";
+    $result = $conn->query($sql);
+
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $id_producto_syscom[] = $row['id_producto_syscom'];
+        }
+    }
+
+    return $id_producto_syscom;
+}
+ 
+para consultar información a la API SYSCOM, con esta funcion:
+    
+/**
+ * Función para hacer una llamada GET a la API de SYSCOM
+ * 
+ * @param string $token Token de autorización
+ * @return array|null Respuesta decodificada de la API o null si falla
+ */
+function consultarApiSyscom($id_producto_syscom, $token) {
+    $url = "https://developers.syscom.mx/api/v1/productos/$id_producto_syscom";
+    $headers = ["Authorization: Bearer $token"];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        echo "Error al realizar la solicitud: " . curl_error($ch) . "\n";
+        return null;
+    }
+
+    curl_close($ch);
+    return json_decode($response, true);
+}
+
+ 
+ Los resultados de la consulta son formato json, capturar el valor de las llaves: (precio_1,precio_especial,precio_descuento,precio_lista) dentro del array: "precios": 
+
+    "precios": {
+        "precio_1": 220,
+        "precio_especial": 149.39,
+        "precio_descuento": 93.21,
+        "volumen": {
+            "31": 89.49
+        },
+        "precio_lista": 220
+    },
+
+ 
+ 
+ deben almacenarse en una base de datos MySQL, con esta funcion:
+
+
+ /**
+ * Función para insertar datos del producto en la tabla `plataforma_productos_precios_syscom`
+ * 
+ * @param mysqli $conn Conexión activa a la base de datos
+ * @param array $datos Datos del producto
+ * @return bool Resultado de la operación
+ */
+function insertarPreciosSyscom($conn, $datos) {
+    $sql = "INSERT INTO `plataforma_productos_precios_syscom`
+            (`id_producto_syscom`, `precio_1`, `precio_especial`, `precio_descuento`, `precio_lista`) 
+            VALUES (?, ?, ?, ?, ?)";
+
+    $stmt = $conn->prepare($sql);
+
+    if (!$stmt) {
+        echo "Error al preparar la consulta: " . $conn->error . "\n";
+        return false;
+    }
+
+ 
+    // Convertir `caracteristicas` a un string JSON si es un array
+    if (is_array($datos['caracteristicas'])) {
+        $datos['caracteristicas'] = json_encode($datos['caracteristicas'], JSON_UNESCAPED_UNICODE);
+    }
+
+
+    $stmt->bind_param(
+        "sdddd",
+        $datos['precio_1'],
+        $datos['precio_especial'],
+        $datos['precio_descuento'],
+        $datos['precio_lista']
+    );
+
+    $result = $stmt->execute();
+
+    if (!$result) {
+        echo "Error al ejecutar la consulta: " . $stmt->error . "\n";
+    }
+    
+    $stmt->close();
+
+    return $result;
+}
+
+ 
+ Asegurando que las consultas sean seguras y optimizadas. 
+ El código debe ser modular y reutilizable."
+
+
+
+
+
+===============================================================================================================================================
+
+CONSULTA 
+arquitectura de base de datos y desarrollo de software
+
+- Tengo este esquema de BD:  
+
+/* 1. plataforma_productos_arbol_de_categorias */
+CREATE TABLE `plataforma_productos_arbol_de_categorias` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único del ITEM',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+  `id_categoria` CHAR(20) COMMENT 'Id de la categoria',
+  `name_categoria` VARCHAR(250)  COMMENT 'Nombre de la categoria',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_id_categoria` (`id_categoria`) COMMENT 'Llave única para la columna categoria_id'
+) ENGINE=InnoDB 
+DEFAULT CHARSET=utf8mb4 
+COLLATE=utf8mb4_general_ci 
+COMMENT='Tabla que almacena el total de las categorias';
+
+
+/* 2. plataforma_productos_detalle_por_categoria */
+CREATE TABLE `plataforma_productos_detalle_por_categoria` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único del ITEM',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+  `id_categoria` CHAR(20) COMMENT 'Id de la categoria',
+  `id_children_category` CHAR(20) COMMENT 'Id sub-categoria la categoria',
+  `name_categoria` VARCHAR(250)  COMMENT 'Nombre de la categoria',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_id_children_category` (`id_children_category`) COMMENT 'Llave única para la columna id_children_categoriy',
+  FOREIGN KEY (`id_categoria`) REFERENCES `plataforma_productos_arbol_de_categorias` (`id_categoria`)
+  ON DELETE SET NULL 
+  ON UPDATE CASCADE
+) ENGINE=InnoDB 
+DEFAULT CHARSET=utf8mb4 
+COLLATE=utf8mb4_general_ci 
+COMMENT='Tabla que almacena las subcategorias ';
+
+
+
+/*3. Proveedores */
+CREATE TABLE `plataforma_productos_proveedores` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único del proveedor',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+  `nombre_proveedor` VARCHAR(250)  COMMENT 'Nombre o descripción del proveedor',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB 
+DEFAULT CHARSET=utf8mb4 
+COLLATE=utf8mb4_general_ci 
+COMMENT='Tabla para almacenar los proveedores';
+
+
+
+
+/*4. Marcas  */
+CREATE TABLE `plataforma_productos_marcas` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único de la marca',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+  `id_proveedor` INT UNSIGNED  COMMENT 'Identificador del proveedor (clave foránea)',
+  `nombre_marca` VARCHAR(250)  COMMENT 'Nombre o descripción de la marca',
+
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`id_proveedor`) REFERENCES `plataforma_productos_proveedores` (`id`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+) ENGINE=InnoDB 
+  DEFAULT CHARSET=utf8mb4 
+  COLLATE=utf8mb4_general_ci 
+  COMMENT='Tabla para almacenar las marcas';
+
+
+
+/*5. Moneda  */
+CREATE TABLE `plataforma_productos_moneda` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único de la moneda',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+  `moneda` CHAR(20)  COMMENT 'Tipo moneda',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB 
+  DEFAULT CHARSET=utf8mb4 
+  COLLATE=utf8mb4_general_ci 
+  COMMENT='Tabla para almacenar las monedas';
+
+
+
+/*6. Envios */
+CREATE TABLE `plataforma_productos_envios` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único de envíos',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+
+  `nombre_envio` VARCHAR(250)  COMMENT 'Nombre del envío',
+  `costo` DECIMAL(10,2)  COMMENT 'Costo del envío',
+  `id_moneda` INT UNSIGNED  COMMENT 'Identificador de la moneda (clave foránea)',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`id_moneda`) REFERENCES `plataforma_productos_moneda` (`id`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+) ENGINE=InnoDB 
+  DEFAULT CHARSET=utf8mb4 
+  COLLATE=utf8mb4_general_ci 
+  COMMENT='Tabla para almacenar los envíos';
+
+
+
+
+  /*.7 Tipos Publicaciones */
+CREATE TABLE `plataforma_productos_tipos_publicacion` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único del tipo de publicación',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+  `site_id` CHAR(20) DEFAULT 'MLM' COMMENT 'Identificador del sitio (ej. MLM)',
+  `tipo_publi_id` CHAR(20)  COMMENT 'Identificador del tipo de publicación asociado al sitio',
+  `name` VARCHAR(250)  COMMENT 'Nombre del tipo de publicación',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_tipo_publi_id` (`tipo_publi_id`) COMMENT 'Llave única para la tipo publicacion'
+) ENGINE=InnoDB 
+  DEFAULT CHARSET=utf8mb4 
+  COLLATE=utf8mb4_general_ci 
+  COMMENT='Tabla para almacenar los tipos de publicación';
+
+
+
+
+/* 8. Total ITEMS Meli */
+CREATE TABLE `plataforma_productos_total_items` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único del ITEM',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+  `search_type` CHAR(20) DEFAULT 'scan' COMMENT 'Tipo de búsqueda (scan total, etc.)',
+
+  `scroll_id` VARCHAR(250)  COMMENT 'Identificador para actualizar dinámicamente',
+  `seller_id` INT UNSIGNED  COMMENT 'Identificador del vendedor',
+  `limit` INT UNSIGNED DEFAULT 250 COMMENT 'Límite de resultados por publicación (hasta 50)',
+  `item_id` CHAR(20)  COMMENT 'Identificador del ítem en Meli',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_item_id` (`item_id`) COMMENT 'Llave única para publicaciones Meli'
+  
+) ENGINE=InnoDB 
+  DEFAULT CHARSET=utf8mb4 
+  COLLATE=utf8mb4_general_ci 
+  COMMENT='Tabla para almacenar los ítems publicados en Meli';
+
+
+
+
+/* 9. plataforma_productos_atributos */
+CREATE TABLE `plataforma_productos_atributos` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único del registro',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+
+  `item_id` CHAR(20)  COMMENT 'ITEM_ID Publicaciones Meli (Llave foránea)',
+
+  `title` VARCHAR(250)  COMMENT 'Nombre de la publicación en Meli',
+  `family_name` VARCHAR(20) COMMENT 'Nombre familia publicacion',
+  `seller_id` INT UNSIGNED COMMENT 'ID Sello de publicacion',
+  `category_id` CHAR(20)  COMMENT 'ID de la categoría de la publicación',
+  `price` DECIMAL(10,2)  COMMENT 'Precio de la publicación',
+  `currency_id` CHAR(10)  COMMENT 'El tipo de moneda de publicacion',
+  `listing_type_id` CHAR(20)  COMMENT 'ID del tipo de publicación en Meli (Llave foránea)',
+  `condition` CHAR(10)  COMMENT 'Indica si el producto es nuevo o usado',
+  `permalink` TEXT  COMMENT 'Enlace de la publicación en Meli',
+
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`listing_type_id`) REFERENCES `plataforma_productos_tipos_publicacion` (`tipo_publi_id`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+) ENGINE=InnoDB 
+  DEFAULT CHARSET=utf8mb4 
+  COLLATE=utf8mb4_general_ci 
+  COMMENT='Tabla para almacenar los atributos de ítems publicados en Meli';
+
+
+
+
+
+
+/* 10.   */  
+CREATE TABLE `plataforma_productos_syscom` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único del ITEM',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+  `id_producto_syscom` INT UNSIGNED NOT NULL COMMENT 'ID producto syscom',
+  `modelo` VARCHAR(50)  COMMENT 'El modelo clasificado por Syscom',
+  `total_existencia` INT UNSIGNED COMMENT 'existencias por producto',
+  `titulo` TEXT COMMENT 'Descripcion del producto por syscom',
+
+  `marca` VARCHAR(250)  COMMENT 'Marca correspondiente al producto Fk tabla marca ',
+  `imagen` TEXT  COMMENT 'imagen del producto',
+  `link_privado` TEXT  COMMENT 'link de la publicacion en SYSCOM',
+  `descripcion` TEXT  COMMENT 'Detalles adicionales al producto',
+  `caracteristicas` TEXT  COMMENT 'Caracteristicas del producto',
+  `imagens` TEXT  COMMENT 'Una imagen del producto',
+  `peso` DECIMAL(10,2)  COMMENT 'Peso del producto',
+  `alto` DECIMAL(10,2)  COMMENT 'altura del producto',
+  `largo` DECIMAL(10,2)  COMMENT 'Largo del producto',
+  `ancho` DECIMAL(10,2)  COMMENT 'Ancho del producto',
+
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_id_producto_syscom` (`id_producto_syscom`) COMMENT 'Llave única para el ID producto syscom'
+) ENGINE=InnoDB DEFAULT 
+  CHARSET=utf8mb4 
+  COLLATE=utf8mb4_general_ci 
+  COMMENT='La tabla contiene todos los productos que vende fragolan de syscom';
+
+
+
+
+/* 11. plataforma_productos_result_campania */
+CREATE TABLE `plataforma_productos_result_campania` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+
+  `campaign_id` INT UNSIGNED NOT NULL COMMENT 'ID campania',
+  `nombre_campania` VARCHAR(250) COMMENT 'Nombre de la campania',
+  `status` CHAR(20) COMMENT 'Estado de la campania ON/OFF',
+  `last_updated` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de ultima modificacion',
+  `date_created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creacion',
+  `channel` CHAR(20)  COMMENT 'imagen del producto',
+  `acos_target` DECIMAL(10,2) NOT NULL COMMENT 'El costo de la campania',
+  `limit` INT UNSIGNED DEFAULT 250 COMMENT 'limite del numero de resultados',
+  `date_from` DATE NOT NULL COMMENT 'Fecha inicio para obtener el reporte de campanias',
+  `date_to` DATE NOT NULL COMMENT 'Fecha final para obtener el reporte de campanias',
+
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_campaign_id` (`campaign_id`) COMMENT 'Llave única para el ID campania'
+
+) ENGINE=InnoDB DEFAULT 
+  CHARSET=utf8mb4 
+  COLLATE=utf8mb4_general_ci 
+  COMMENT='La tabala que contiene todas las campanias con un rango de fecha';
+
+
+
+
+/* Sin poblar */
+/* 12. plataforma_productos_metric_campania */
+CREATE TABLE `plataforma_productos_metric_campania` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+  `id_campaign` INT UNSIGNED  COMMENT 'ID campania (Llave foranea)',
+ 
+  `clicks` INT UNSIGNED  COMMENT 'Numero clicks de la campania',
+  `prints` INT UNSIGNED  COMMENT 'Impreciones de campania',
+  `cost` DECIMAL(10,2)  COMMENT 'Costo de campania',
+  `cpc` DECIMAL(10,2)  COMMENT 'Costo CPC campania',
+  `ctr` DECIMAL(10,2)  COMMENT 'Costo CTR campania',
+  `direct_amount` DECIMAL(10,2)  COMMENT 'Monto directo campania',
+  `indirect_amount` DECIMAL(10,2)  COMMENT 'Monto indirecto campania',
+  `total_amount` DECIMAL(10,2)  COMMENT 'Total de montos',
+  `direct_units_quantity` INT UNSIGNED NOT NULL COMMENT 'total Unidades directas ',
+  `indirect_units_quantity` INT UNSIGNED NOT NULL COMMENT 'total Unidades indirectas ',
+  `direct_items_quantity` INT UNSIGNED NOT NULL COMMENT 'cantidad_artículos_directos',
+
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`id_campaign`) REFERENCES `plataforma_productos_result_campania` (`campaign_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT 
+  CHARSET=utf8mb4 
+  COLLATE=utf8mb4_general_ci 
+  COMMENT='La tabala que contiene todas las campanias con un rango de fecha';
+
+
+
+
+/* 13. plataforma_productos_anuncio_meli */
+CREATE TABLE `plataforma_productos_anuncio_meli` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+  
+  `item_id` CHAR(20)  COMMENT 'Identificador del ítem en Meli (Llave foranea)', 
+  `campaign_id` INT UNSIGNED  COMMENT 'Id Campania (Llave foranea)',
+
+  `price` DECIMAL(10,2)  COMMENT 'Precio venta del producto',
+  `title` TEXT  COMMENT 'Descripcion del producto',
+  `status` CHAR(20)  COMMENT 'Estado de la publicacion',
+  `domain_id` CHAR(20)  COMMENT 'Dominio de la publicacion',
+  `date_created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creacion del publicacion',
+  `channel` CHAR(20)  COMMENT 'Canal de publicacion',
+  `brand_value_id` INT UNSIGNED  COMMENT 'Valor de la marca ID',
+  `brand_value_name` VARCHAR(250)  COMMENT 'Nombre de la publicidad',
+  `current_level` CHAR(20)  COMMENT 'nivel actual de la publicidad',
+  `permalink` TEXT  COMMENT 'Link del anuncio',
+
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`item_id`) REFERENCES `plataforma_productos_total_items` (`item_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE,
+  FOREIGN KEY (`campaign_id`) REFERENCES `plataforma_productos_result_campania` (`campaign_id`)
+  ON DELETE SET NULL
+  ON UPDATE CASCADE
+
+) ENGINE=InnoDB DEFAULT 
+  CHARSET=utf8mb4 
+  COLLATE=utf8mb4_general_ci 
+  COMMENT='La tabala el anuncio correspondiente por id publicacion Meli';
+
+
+
+
+/* 14. plataforma_productos_tipo_cambio */
+CREATE TABLE `plataforma_productos_tipo_cambio` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+  `fecha` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Fecha y hora actual TC',
+
+  `normal` decimal(10,2)  COMMENT 'tipo de cambio normal en Syscom',
+  `preferencial` decimal(10,0) ,
+  `un_dia` decimal(10,0) ,
+  `una_semana` decimal(10,0) ,
+  `dos_semanas` decimal(10,0) ,
+  `tres_semanas` decimal(10,0) ,
+  `un_mes` decimal(10,0) ,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT 
+  CHARSET=utf8mb4 
+  COLLATE=utf8mb4_general_ci 
+  COMMENT='Almacena el TC diario';
+
+
+
+
+ /* 15. plataforma_productos_precios_syscom */
+CREATE TABLE `plataforma_productos_precios_syscom` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+  `fecha` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Fecha y hora actual TC',
+
+  `id_producto_syscom` INT UNSIGNED COMMENT 'ID syscom de la tabla plataforma_productos_syscom',
+  `precio1` DECIMAL(10,2) ,
+  `precio_especial` DECIMAL(10,2) ,
+  `precio_descuento` DECIMAL(10,2) ,
+  `precio_lista` DECIMAL(10,2) ,
+
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`id_producto_syscom`) REFERENCES `plataforma_productos_syscom` (`id_producto_syscom`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT 
+  CHARSET=utf8mb4 
+  COLLATE=utf8mb4_general_ci 
+
+
+
+
+ /* 16. plataforma_productos_categorias_syscom */
+CREATE TABLE `plataforma_productos_categorias_syscom` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+
+  `id_producto_syscom` INT UNSIGNED COMMENT 'ID syscom de la tabla plataforma_productos_syscom',
+  `id_categorias` int UNSIGNED,
+  `nombre` VARCHAR(250) ,
+  `nivel` INT UNSIGNED ,
+
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`id_producto_syscom`) REFERENCES `plataforma_productos_syscom` (`id_producto_syscom`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT 
+  CHARSET=utf8mb4 
+  COLLATE=utf8mb4_general_ci 
+
+
+/*Tabla 17 Pendiente por crear*/
+
+
+/*Tabla 18 Pendiente por crear*/
+
+
+
+/* 19. plataforma_productos_stock */
+CREATE TABLE `plataforma_productos_stock` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Identificador único',
+  `id_dominio` INT UNSIGNED DEFAULT 9999 COMMENT 'Identificador del dominio asociado',
+
+  `id_categoria` CHAR(20) COMMENT 'Llave foránea a la tabla plataforma_productos_arbol_de_categorias',
+  `proveedor_id` INT UNSIGNED COMMENT 'Llave foránea a la tabla plataforma_productos_proveedores',
+  `marca_id` INT UNSIGNED COMMENT 'Llave foránea a la tabla plataforma_productos_marcas',
+  `costo_envio_id` INT UNSIGNED COMMENT 'Llave foránea a la tabla plataforma_productos_envios',
+  `item_id` CHAR(20) COMMENT 'Llave foránea a la tabla plataforma_productos_total_items',
+  `producto_syscom_id` INT UNSIGNED COMMENT 'Llave foránea a la tabla plataforma_productos_syscom',
+  `id_sub_categoria` CHAR(20) COMMENT 'Llave foránea a la tabla plataforma_productos_detalle_por_categoria',
+
+  `inv_minimo` INT UNSIGNED  COMMENT 'Inventario mínimo del producto para publicar en Meli',
+  `orden` INT UNSIGNED  COMMENT 'Orden para el reporte',
+  `fecha` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha y hora de captura',
+  `status` INT UNSIGNED  COMMENT 'Estado del producto en Mercado Libre',
+  `modelo` VARCHAR(250)  COMMENT 'Modelo del producto en Syscom',
+
+  `fijo_plataforma` TEXT  COMMENT 'URL interna del vendedor',
+  `url_proveedor_1` TEXT  COMMENT 'URL 1 del proveedor',
+  `url_proveedor_2` TEXT  COMMENT 'URL 2 del proveedor',
+  `url_proveedor_3` TEXT  COMMENT 'URL 3 del proveedor',
+  `url_proveedor_4` TEXT  COMMENT 'URL 4 del proveedor',
+  `url_proveedor_5` TEXT  COMMENT 'URL 5 del proveedor',
+  `url_proveedor_6` TEXT  COMMENT 'URL 6 del proveedor',
+  `observaciones` TEXT  COMMENT 'Observaciones sobre el producto',
+
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`id_categoria`) REFERENCES `plataforma_productos_arbol_de_categorias` (`id_categoria`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`proveedor_id`) REFERENCES `plataforma_productos_proveedores` (`id`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`marca_id`) REFERENCES `plataforma_productos_marcas` (`id`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`costo_envio_id`) REFERENCES `plataforma_productos_envios` (`id`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`item_id`) REFERENCES `plataforma_productos_total_items` (`item_id`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`producto_syscom_id`) REFERENCES `plataforma_productos_syscom` (`id_producto_syscom`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
+  FOREIGN KEY (`id_sub_categoria`) REFERENCES `plataforma_productos_detalle_por_categoria` (`id_children_category`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT 
+  CHARSET=utf8mb4 
+  COLLATE=utf8mb4_general_ci 
+  COMMENT='Tabla para almacenar información del stock de productos.';
+
+
+
+necesito poblar la tabla: plataforma_productos_stock que se relaciona con las demas tablas con las FK
+- Necesito poblar la tabla con los datos de las demas tablas atravez de las llaves foraneas y mas calculos atravez con funciones
+- Pregunta: Es Recomendable incrementar la tabla con registros que faltan atravez de las llaves foraneas para insertar en cada registro o
+  es preferible no insertar los datos y mandar llamar las funciones cada que de soliciten para obtener los datos o un query a una tabla extensa?
+
+dame una recomdacion como exprerto en BD, arquitectura de software, Mejores practicas en PHP 
+
+
+=============================================================================================================================================================================================
+
+Poblando: plataforma_productos_children_category
+
+
+De este codigo:
+
+<?php
+// Alertas de errores
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Cargar las dependencias necesarias
+require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/db/conexion.php'; // Conexión a la base de datos
+require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/files/token/token_meli.php'; // Clase MeliToken
+
+/**
+ * Función para obtener los id_children_categoriy desde la tabla `plataforma_productos_detalle_por_categoria`
+ * 
+ * @param mysqli $conn Conexión activa a la base de datos
+ * @return array Lista de id_categoria
+ */
+function obtenerIdChildrenCategory($conn) {
+    $idChildrenCatogory = [];
+    $sql = "SELECT id_children_category FROM plataforma_productos_detalle_por_categoria";
+    $result = $conn->query($sql);
+
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $idChildrenCatogory[] = $row['id_children_category'];
+        }
+    }
+
+    return $idChildrenCatogory;
+}
+
+
+// Ruta del arcivo
+$categos_y_Atributos = $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/consultas_Meli/categoriasYatributos.json';
+
+
+ function leerCategoriasYatributos($categos_y_Atributos){
+    $json = file_get_contents($categos_y_Atributos, 'categoriasYatributos.json');
+    // Check if the file was read successfully
+    if ($json === false) {
+        die('Error reading the JSON file');
+    }
+
+    //Decode the JSON file
+    $json_data = json_decode($json, true);
+
+    // Check if the JSON was decoded successfully
+    if ($json_data === null) {
+        die('Error decoding the JSON file');
+    }
+
+    // Display data
+    echo "<pre>";
+    print_r($json_data);
+    echo "</pre>";
+
+ }
+
+ /**
+ * Función para insertar datos en la tabla `plataforma_productos_children_category`
+ * 
+ * @param mysqli $conn Conexión activa a la base de datos
+ * @param string $idChildrenCatogory ID de la sub categoría
+ * @param array $childrenCategories Lista de categorías hijas
+ * @return void
+ */
+function insertarChildrenCategories($conn, $idChildrenCatogory) {
+    $sql = "INSERT INTO plataforma_productos_children_category (idChildrenCatogory, id_categoria3, name_categoria3) 
+            VALUES (?, ?, ?)";
+
+    $stmt = $conn->prepare($sql);
+
+    if (!$stmt) {
+        echo "Error al preparar la consulta: " . $conn->error . "\n";
+        return;
+    }
+
+    foreach ($childrenCategories as $child) {
+        $stmt->bind_param(
+            "sss",
+            $id_children_category,
+            $id_categoria3['id'],
+            $name_categoria3['name']
+        );
+
+        if (!$stmt->execute()) {
+            echo "Error al insertar datos: " . $stmt->error . "\n";
+        }
+    }
+
+}
+
+
+ // Ejecutar proceso consulta
+// print_r(obtenerIdChildrenCategory($conn));
+
+
+// Ejecuta consulta json
+// leerCategoriasYatributos($categos_y_Atributos);
+
+// insertarChildrenCategories
+insertarChildrenCategories($conn, $idChildrenCatogory);
+
+
+// Cerrar la conexión a la base de datos
+$conn->close();
+?>
+
+
+corrige los errores, y adecua el codigo apra que se cumplan los objetivos del codigo:
+
+1. obtener: $idChildrenCatogory. -> Se obtienen correctamente
+2. Leer el archivo: categoriasYatributos.json -> se lee correctamente
+3. Buscar el: $idChildrenCatogory en archivo: categoriasYatributos.json obtener los children_categories que corresponden a: $idChildrenCatogory
+4. Los datos obtenidos insertarlos en la tabla: plataforma_productos_children_category
+
+
+======================================================================================================================================================================================
+
+De esta base de datos: 
+
+
+Insertar los datos de la tabla: plataforma_productos_stock, con la union 
+de estados dos campos: 
+
+  `item_id` CHAR(20) COMMENT 'Llave foránea a la tabla plataforma_productos_total_items',
+  `producto_syscom_id` INT UNSIGNED COMMENT 'Llave foránea a la tabla plataforma_productos_syscom',
+
+Indica como experto en bd y backend PHP como realizar este proceso
+automaticamente
+
+MEJORAS
+
+Del codigo anterior, realiza lo siguente: 
+
+Une la tabla temporal: 
+
+CREATE TEMPORARY TABLE IF NOT EXISTS temp_comisiones (
+            item_id VARCHAR(50) NOT NULL,
+            percentage_fee DECIMAL(10, 2) DEFAULT NULL,
+            PRIMARY KEY (item_id)
+
+), 
+
+con la consulta: 
+
+$sql_utilidad="
+    SELECT 
+        sys.id_producto_syscom AS 'ID SYSCOM', 
+        MAX(ps.fecha) AS 'FECHA',
+        ps.precio_descuento AS 'PRECIO',
+        (ps.precio_descuento * ppv.iva) AS 'IVA',
+        (ps.precio_descuento + (ps.precio_descuento * ppv.iva)) AS 'USD TOTAL',
+        (ps.precio_descuento + (ps.precio_descuento * ppv.iva)) * tc.normal AS 'USD COSTO',
+        a.price AS 'MXN PRECIO ML'
+    FROM 
+        plataforma_productos_syscom_meli sm
+    JOIN
+        plataforma_productos_atributos a
+        ON sm.item_id = a.item_id
+    JOIN 
+        plataforma_productos_syscom sys
+        ON sm.producto_id = sys.id_producto_syscom
+    JOIN 
+        plataforma_productos_precios_syscom ps 
+        ON ps.id_producto_syscom = sys.id_producto_syscom
+    CROSS JOIN 
+        (SELECT iva FROM plataforma_productos_variables LIMIT 1) ppv
+    CROSS JOIN 
+        (SELECT normal FROM plataforma_productos_tipo_cambio LIMIT 1) tc
+    GROUP BY 
+            sm.producto_id, sm.item_id, a.price, sys.id_producto_syscom, ps.precio_descuento";
+
+- Se unen con sys.id_producto_syscom y item_id VARCHAR(50) NOT NULL, mostrar el dato: percentage_fee
+enseguida de: a.price
+- Imprime el resultado de la consulta completa en el navegador 
+
+
+=======================================================================================================================================================

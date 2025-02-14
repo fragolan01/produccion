@@ -1,0 +1,296 @@
+tengo este proyectco MVC, esta es su estructura:
+C:\XAMPP\HTDOCS\MODUL_STOCK
+├───public
+├───src
+│   ├───controllers
+│   ├───models
+│   └───views
+└───vendor
+    └───lib
+        └───Twig
+            ├───Error
+            ├───Extension
+            ├───Filter
+            ├───Function
+            ├───Loader
+            ├───Node
+            │   └───Expression
+            │       ├───Binary
+            │       ├───Filter
+            │       ├───Test
+            │       └───Unary
+            ├───NodeVisitor
+            ├───Sandbox
+            ├───Test
+            └───TokenParser
+
+PausaPubliMlModel.php:
+<?php
+
+namespace src\Models;
+
+class PausaPubliMlModel
+{
+
+    public function getConnection()
+    {
+        // Cargar las dependencias necesarias
+        require_once $_SERVER['DOCUMENT_ROOT'] . '/productos_fragolan/db/conexion.php'; // Conexión a la base de datos
+        return $conn;
+    }
+
+    public function pausarPubliMeli ($conn)
+    {
+        $sql = "
+
+        SELECT 
+        sys.id_producto_syscom AS 'ID SYSCOM', 
+        sys.total_existencia AS 'EXIXTRNCIA', 
+        im.inv_min AS 'INV MINIMO', 
+        sm.id_item_meli AS 'PUBLI MELI'
+        FROM plataforma_productos_syscom sys
+        JOIN plataforma_productos_inventario_mini im
+        ON im.id_syscom = sys.id_producto_syscom
+        JOIN plataforma_productos_syscom_meli sm
+        ON sm.id_prod_syscom = sys.id_producto_syscom
+        WHERE sys.total_existencia <= im.inv_min;
+        
+        ";
+
+        $resultado = $conn->query($sql);
+
+        if ($resultado === false) {
+            die("Error en la consulta: " . $conn->error);
+        }
+
+        return $resultado->fetch_all(MYSQLI_ASSOC); // Devuelve los datos como un array asociativo
+
+
+    }
+
+
+}
+
+Vista: pausaPubliMeli.twig:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Productos Syscom Meli</title>
+</head>
+<body>
+    {% if productos is empty %}
+        <p>No hay datos disponibles.</p>
+    {% else %}
+        <table border="1" cellpadding="5" cellspacing="0">
+            <tr>
+                <th>PROD</th>
+                <th>EXISTENCIA</th>
+                <th>INV MINIMO</th>
+                <th>ID PUBLI MELI</th>
+
+            </tr>
+            {% for producto in productos %}
+                <tr>
+                    <td>{{ producto['ID SYSCOM'] }}</td>
+                    <td>{{ producto['EXIXTRNCIA'] }}</td>
+                    <td>{{ producto['INV MINIMO'] }}</td>
+                    <td>{{ producto['PUBLI MELI'] }}</td>
+
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</body>
+</html>
+
+Controlador: PausaPubliMeliController.php: 
+<?php
+
+namespace src\Controllers;
+
+//Llamar al modedlo
+require_once __DIR__. '../../models/PausaPubliMlModel.php';
+
+require_once __DIR__ . '/../../vendor/lib/Twig/Autoloader.php';
+\Twig_Autoloader::register();
+
+use src\models\PausaPubliMlModel;
+
+class PausaPubliMlController
+{
+    private $PausaPubliMlModel;
+    private $twig;
+
+    public function __construct()
+    {
+        // $this->productModel = new ProductModel();
+        $this->PausaPubliMlModel = new PausaPubliMlModel();
+
+
+        $loader = new \Twig_Loader_Filesystem(__DIR__ . '/../views');
+        $this->twig = new \Twig_Environment($loader);
+    }
+
+    public function displayProductsPausa()
+    {
+        $conn = $this->PausaPubliMlModel->getConnection();
+        $productosPausa = $this->PausaPubliMlModel->pausarPubliMeli($conn);
+        echo $this->twig->render('pausaPubliMeli.twig', ['productos' => $productos]);
+        $conn->close();
+    }
+
+
+}
+
+De este codigo es un modelo:
+<?php
+
+namespace src\Models;
+
+class PausaPubliMlModel
+{
+    public function getConnection()
+    {
+        // Cargar las dependencias necesarias
+        require_once $_SERVER['DOCUMENT_ROOT'] . '/MODUL_STOCK/db/conexion.php'; // Conexión a la base de datos
+        return $conn;
+    }
+
+    // Método para obtener el token de autenticación
+    public function getTokenMeli() {
+        // Incluir el archivo que contiene la clase MeliToken
+        require_once $_SERVER['DOCUMENT_ROOT'] . '/MODUL_STOCK/token/token_meli.php'; // Conexión a la base de datos
+        // Crear una instancia de la clase MeliToken
+        $meliToken = new MeliToken();
+        // Llamar al método getTokenMeli() y devolver el token
+        return $meliToken->getTokenMeli();
+    }
+        
+    
+    public function pausarPubliMeli($conn)
+    {
+        $sql = "
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY sm.orden) AS NUMERO,
+            sys.id_producto_syscom AS 'ID SYSCOM', 
+            sys.total_existencia AS 'EXISTENCIA', 
+            im.inv_min AS 'INV MINIMO', 
+            sm.id_item_meli AS 'PUBLI MELI'
+        FROM plataforma_productos_syscom sys
+        JOIN plataforma_productos_inventario_mini im
+        ON im.id_syscom = sys.id_producto_syscom
+        JOIN plataforma_productos_syscom_meli sm
+        ON sm.id_prod_syscom = sys.id_producto_syscom
+        WHERE sys.total_existencia <= im.inv_min;
+        ";
+
+        $resultado = $conn->query($sql);
+
+        if ($resultado === false) {
+            die("Error en la consulta: " . $conn->error);
+        }
+
+        return $resultado->fetch_all(MYSQLI_ASSOC); // Devuelve los datos como un array asociativo
+    }
+
+    public function pausarProducto($id_syscom) {
+        // URL base de la API
+        $url_base = "https://api.mercadolibre.com/items/";
+
+        if ($stmt = $this->conn->prepare($sql)) {
+            $stmt->bind_param("s", $id_syscom);
+            $stmt->execute();
+            $stmt->bind_result($id_pub_meli);            
+            
+            if ($stmt->fetch()) {
+                // Construir la URL completa para la solicitud PUT
+                $url = $url_base . $id_pub_meli;
+
+                // Datos a enviar
+                $data = array("status" => "paused");
+                $jsonData = json_encode($data);
+
+                // Opciones HTTP para la solicitud PUT
+                $options = array(
+                    'http' => array(
+                        'header'  => array(
+                            "Authorization: Bearer $this->token",
+                            "Content-Type: application/json",
+                            "Content-Length: " . strlen($jsonData)
+                        ),
+                        'method'  => 'PUT',
+                        'content' => $jsonData
+                    )
+                );
+
+                $context = stream_context_create($options);
+
+                // Realizar la solicitud PUT
+                $response = file_get_contents($url, false, $context);
+
+                if ($response === FALSE) {
+                    $stmt->close();  // Aseguramos cerrar el statement en caso de error
+                    return 'Error al realizar la solicitud';
+                }
+
+                // Cerrar el statement después del SELECT
+                $stmt->close();  
+
+
+            } else {
+                $stmt->close();  // Cerrar si no hay resultados
+                return "No se encontró ningún registro con id_syscom = $id_syscom.";
+            }
+
+        } else {
+            return "Error al preparar la consulta: " . $this->conn->error;
+        }
+    }
+
+}
+
+Modofica el codigo para obtener de:
+    return $resultado->fetch_all(MYSQLI_ASSOC); // Devuelve los datos como un array asociativo
+
+el:  sm.id_item_meli AS 'PUBLI MELI' y aplicar a la funcion: function pausarProducto(sm.id_item_meli) 
+
+
+================================================================================================================
+
+C:\XAMPP\HTDOCS\MODUL_STOCK
+├───db
+├───public
+├───src
+│   ├───controllers
+│   ├───models
+│   │   └───token
+│   └───views
+├───token
+└───vendor
+    └───lib
+        └───Twig
+            ├───Error
+            ├───Extension
+            ├───Filter
+            ├───Function
+            ├───Loader
+            ├───Node
+            │   └───Expression
+            │       ├───Binary
+            │       ├───Filter
+            │       ├───Test
+            │       └───Unary
+            ├───NodeVisitor
+            ├───Sandbox
+            ├───Test
+            └───TokenParser
+PS C:\xampp\htdocs>
+
+    Directorio: C:\xampp\htdocs\modul_stock\token
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----     06/01/2025  10:53 a. m.           2201 renuevatoken.php
+-a----     10/02/2025  04:17 p. m.            249 tokens.json
+-a----     11/02/2025  10:03 a. m.            789 token_meli.php
